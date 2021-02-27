@@ -7,7 +7,16 @@
 #include <xtensor/xio.hpp>
 #include <xtensor/xview.hpp>
 
-#include "ado/smo.h"
+#include "ado/kernel.h"
+#include "ado/svm.h"
+#include "ado/types.h"
+
+using ado::Float;
+using ado::FloatArray;
+using ado::Kernel;
+using ado::KernelLinear;
+using ado::KernelRBF;
+using ado::SVM;
 
 FloatArray load_data(const std::string& filepath) {
   std::ifstream in_file;
@@ -26,7 +35,8 @@ int main(int argc, char* argv[]) {
   FloatArray y =
       xt::col(load_data("../data/y_data.csv"), 0);  // TODO: add to fit.
 
-  const auto kernel_list = {KernelType::Linear, KernelType::RBF};
+  std::array<std::unique_ptr<Kernel>, 2> kernel_list = {
+      std::make_unique<KernelLinear>(), std::make_unique<KernelRBF>(5.0)};
   const auto n_samples = 40;
 
   // Generate data.
@@ -39,13 +49,16 @@ int main(int argc, char* argv[]) {
 
   const FloatArray K = xt::stack(xtuple(xt::flatten(xx), xt::flatten(yy)), 1);
 
-  for (auto kernel_type : kernel_list) {
-    auto svm = SMO(1.0, 1e-4, kernel_type, 5);
+  for (auto kernel = kernel_list.begin(); kernel != kernel_list.end();
+       ++kernel) {
+    const auto kernel_type = (*kernel)->type();
+    auto svm = SVM(1.0, 1e-4, std::move(*kernel), 1e3, 16);
     svm.fit(X, y);
     FloatArray M = svm.predict(K);
     M = M.reshape({n_samples, n_samples});
 
-    save_data(M, "./data/m_data_" + std::to_string(static_cast<int>(kernel_type)) + ".csv");
+    save_data(M, "./data/m_data_" +
+                     std::to_string(static_cast<int>(kernel_type)) + ".csv");
   }
 
   std::cout << "Done !" << std::endl;

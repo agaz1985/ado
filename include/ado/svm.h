@@ -1,13 +1,39 @@
+#ifndef ADO_SVM_H
+#define ADO_SVM_H
+
+#include <memory>
+
+#include "ado/kernel.h"
 #include "ado/model.h"
 #include "ado/types.h"
 
-enum class KernelType { Linear = 0, RBF = 1 };
+namespace ado {
 
-class SMO : public Model {
+/**
+ * @brief Support Vector Machine (SVM) model.
+ *
+ * Implementation of a binary Support Vector Machine (SVM) based on the
+ * Sequential Minimal Optimization (SMO) algorithm used for solving the
+ * quadratic programming (QP) problem generated during training. The SMO
+ * implementation is based on:
+ * Platt, John. "Sequential minimal optimization: A fast algorithm for training
+ * support vector machines." (1998).
+ * https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-98-14.pdf
+ *
+ */
+class SVM : public Model {
  public:
-  SMO(const Float C = 1.0, const Float tol = 1e-4,
-      const KernelType kernel_type = KernelType::Linear, const Float sigma = 5,
-      const std::size_t max_steps = 1e3, const std::size_t seed = 16);
+  /**
+   * @brief Construct a new SVM object
+   *
+   * @param C strictly positive regularization parameter.
+   * @param tol tolerance for stopping criteria.
+   * @param kernel kernel object (e.g. linear or rbf).
+   * @param max_steps maximum number of iteration of the SMO algorithm.
+   * @param seed used for the generation of pseudo random numbers and shuffling.
+   */
+  SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
+      const std::size_t max_steps, const std::size_t seed);
 
   // TODO: Add empty constructor, copy constructor and destructor, inheritance.
 
@@ -49,7 +75,7 @@ class SMO : public Model {
 
   Float _C = 1.0;
   Float _tol = 1e-3;
-  KernelType _kernel_type = KernelType::Linear;
+  std::unique_ptr<Kernel> _kernel = std::make_unique<KernelLinear>();
   Float _sigma = 1.0;
   FloatArray _alphas = FloatArray();
   Float _b = 0.0;
@@ -60,3 +86,7 @@ class SMO : public Model {
   std::size_t _max_steps = 1e3;
   std::size_t _seed = 16;
 };
+
+}  // namespace ado
+
+#endif  // ADO_SVM_H

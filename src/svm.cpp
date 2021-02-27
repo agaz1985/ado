@@ -1,4 +1,4 @@
-#include "ado/smo.h"
+#include "ado/svm.h"
 
 #include <stdexcept>
 #include <xtensor-blas/xlinalg.hpp>
@@ -7,18 +7,19 @@
 #include <xtensor/xsort.hpp>
 #include <xtensor/xtensor.hpp>
 
-SMO::SMO(const Float C, const Float tol, const KernelType kernel_type,
-         const Float sigma, const std::size_t max_steps, const std::size_t seed)
+namespace ado {
+
+SVM::SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
+         const std::size_t max_steps, const std::size_t seed)
     : _C(C),
       _tol(tol),
-      _kernel_type(kernel_type),
-      _sigma(sigma),
+      _kernel(std::move(kernel)),
       _max_steps(max_steps),
       _seed(seed) {
-  xt::random::seed(16);
+  xt::random::seed(seed);
 }
 
-void SMO::fit(const FloatArray& x, const FloatArray& y) {
+void SVM::fit(const FloatArray& x, const FloatArray& y) {
   const std::size_t n_samples = x.shape(0);
   this->_alphas = xt::zeros<Float>({n_samples});
   this->_errors = xt::zeros<Float>({n_samples});
@@ -58,12 +59,12 @@ void SMO::fit(const FloatArray& x, const FloatArray& y) {
   this->_alphas = xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
 }
 
-FloatArray SMO::fit_predict(const FloatArray& x, const FloatArray& y) {
+FloatArray SVM::fit_predict(const FloatArray& x, const FloatArray& y) {
   this->fit(x, y);
   return this->predict(x);
 }
 
-FloatArray SMO::predict(const FloatArray& x) {
+FloatArray SVM::predict(const FloatArray& x) {
   FloatArray predictions = xt::zeros<Float>({x.shape(0)});
 
   for (std::size_t idx = 0; idx < x.shape(0); ++idx) {
@@ -73,7 +74,7 @@ FloatArray SMO::predict(const FloatArray& x) {
   return predictions;
 }
 
-std::int8_t SMO::examine_example(const std::size_t i2, const FloatArray& x,
+std::int8_t SVM::examine_example(const std::size_t i2, const FloatArray& x,
                                  const FloatArray& y) {
   const auto y2 = y(i2);
   const auto alph2 = this->_alphas[i2];
@@ -125,7 +126,7 @@ std::int8_t SMO::examine_example(const std::size_t i2, const FloatArray& x,
   return 0;
 }
 
-Float SMO::eval(const FloatArray& x, const FloatArray& y,
+Float SVM::eval(const FloatArray& x, const FloatArray& y,
                 const FloatArray& alphas, const FloatArray& xi) const {
   Float w_x = 0.0;
   for (std::size_t idx = 0; idx < y.size(); ++idx) {
@@ -135,7 +136,7 @@ Float SMO::eval(const FloatArray& x, const FloatArray& y,
   return w_x - this->_b;
 }
 
-Float SMO::compute_b(const Float& e1, const Float& e2, const Float& y1,
+Float SVM::compute_b(const Float& e1, const Float& e2, const Float& y1,
                      const Float& a1, const Float& alph1, const Float& y2,
                      const Float& a2, const Float& alph2, const Float& k11,
                      const Float& k12, const Float& k22) const {
@@ -152,7 +153,7 @@ Float SMO::compute_b(const Float& e1, const Float& e2, const Float& y1,
     return (b1 + b2) / 2.0;
 }
 
-FloatArray SMO::compute_w(const FloatArray& x1, const FloatArray& x2,
+FloatArray SVM::compute_w(const FloatArray& x1, const FloatArray& x2,
                           const FloatArray& y1, const FloatArray& y2,
                           const FloatArray& a1, const FloatArray& a2,
                           const FloatArray& alph1,
@@ -160,7 +161,7 @@ FloatArray SMO::compute_w(const FloatArray& x1, const FloatArray& x2,
   return this->_w + y1 * (a1 - alph1) * x1 + y2 * (a2 - alph2) * x2;
 }
 
-Float SMO::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
+Float SVM::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
                          const Float& k11, const Float& k12, const Float& k22,
                          const Float& s, const Float& y1, const Float& y2,
                          const Float& e1, const Float& e2) const {
@@ -171,27 +172,17 @@ Float SMO::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
          s * V * V1 * k12;
 }
 
-Float SMO::kernel_function(const FloatArray& x1, const FloatArray& x2) const {
-  if (this->_kernel_type == KernelType::Linear) {
-    auto r = xt::linalg::dot(x1, xt::transpose(x2));
-    return xt::linalg::dot(x1, xt::transpose(x2))(0);
-  } else if (this->_kernel_type == KernelType::RBF) {
-    FloatArray x2_t = xt::transpose(x2);
-    auto s = xt::linalg::dot(x1, xt::transpose(x1)) +
-             xt::linalg::dot(x2, x2_t) - 2 * xt::linalg::dot(x1, x2_t);
-    return xt::exp(-s / (2 * std::pow(this->_sigma, 2)))(0);
-  } else {
-    throw std::invalid_argument("We only support Linear and RBF kernels !");
-  }
+Float SVM::kernel_function(const FloatArray& x1, const FloatArray& x2) const {
+  return this->_kernel->operator()(x1, x2);
 }
 
-Float SMO::clip_value(const Float value, const Float high, const Float low) {
+Float SVM::clip_value(const Float value, const Float high, const Float low) {
   if (value < low) return low;
   if (value > high) return high;
   return value;
 }
 
-std::int8_t SMO::take_step(const std::size_t i1, const std::size_t i2,
+std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
                            const FloatArray& x, const FloatArray& y,
                            const Float& y2, const Float& alph2,
                            const Float& e2) {
@@ -283,7 +274,7 @@ std::int8_t SMO::take_step(const std::size_t i1, const std::size_t i2,
   this->_alphas(i1) = a1;
   this->_alphas(i2) = a2;
 
-  if (this->_kernel_type == KernelType::Linear) {
+  if (this->_kernel->type() == KernelType::Linear) {
     this->_w =
         this->compute_w(xt::view(x, i1, xt::all()), xt::view(x, i2, xt::all()),
                         y1, y2, a1, a2, alph1, alph2);
@@ -292,4 +283,6 @@ std::int8_t SMO::take_step(const std::size_t i1, const std::size_t i2,
   return 1;
 }
 
-FloatArray SMO::alphas() const { return this->_alphas; }
+FloatArray SVM::alphas() const { return this->_alphas; }
+
+}  // namespace ado
