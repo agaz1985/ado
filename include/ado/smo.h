@@ -1,5 +1,5 @@
-#include "cauli/model.h"
-#include "cauli/types.h"
+#include "ado/model.h"
+#include "ado/types.h"
 
 enum class KernelType { Linear = 0, RBF = 1 };
 
@@ -12,6 +12,7 @@ class SMO : public Model {
   // TODO: Add empty constructor, copy constructor and destructor, inheritance.
 
   void fit(const FloatArray& x, const FloatArray& y) override;
+  FloatArray fit_predict(const FloatArray& x, const FloatArray& y) override;
   FloatArray predict(const FloatArray& x) override;
 
   FloatArray alphas() const;

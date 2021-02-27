@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.19)
 set(CMAKE_CXX_STANDARD 14)
 
-project(cauli VERSION 1.0.0 DESCRIPTION "cauli library")
+project(ado VERSION 1.0.0 DESCRIPTION "ado library")
 
 # Project includes and src.
-set(CAULI_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(CAULI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(ADO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(ADO_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(CAULI_HEADERS ${CAULI_INCLUDE_DIR}/{CMAKE_PROJECT_NAME}/smo.h)
-set(CAULI_SOURCES ${CAULI_SOURCE_DIR}/casmo.cpp)
+set(ADO_HEADERS ${ADO_INCLUDE_DIR}/{CMAKE_PROJECT_NAME}/smo.h)
+set(ADO_SOURCES ${ADO_SOURCE_DIR}/smo.cpp)
 
 # Third-party libraries.
 find_package(BLAS REQUIRED)
@@ -24,12 +24,12 @@ message(STATUS "BLAS LIBRARIES: " ${BLAS_LIBRARIES})
 add_definitions(-DHAVE_CBLAS=1)
 
 # Create the library.
-add_library(${CMAKE_PROJECT_NAME} SHARED ${CAULI_SOURCES})
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CAULI_INCLUDE_DIR} ${xtensor_INCLUDE_DIRS})
+add_library(${CMAKE_PROJECT_NAME} SHARED ${ADO_SOURCES})
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${ADO_INCLUDE_DIR} ${xtensor_INCLUDE_DIRS})
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SOVERSION 1)
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES PUBLIC_HEADER ${CAULI_HEADERS})
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES PUBLIC_HEADER ${ADO_HEADERS})
 
 # Link libraries.
 target_link_libraries(${CMAKE_PROJECT_NAME} xtensor xtensor-blas ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} cblas)
@@ -39,7 +39,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} xtensor xtensor-blas ${BLAS_LIBRARIE
 #add_subdirectory(test)
 
 # Examples.
-#add_subdirectory(examples)
+add_subdirectory(examples)
 
 # Install options.
 include(GNUInstallDirs)

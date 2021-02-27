@@ -1,4 +1,4 @@
-#include "cauli/smo.h"
+#include "ado/smo.h"
 
 #include <stdexcept>
 #include <xtensor-blas/xlinalg.hpp>
@@ -56,6 +56,11 @@ void SMO::fit(const FloatArray& x, const FloatArray& y) {
   this->_x_support = xt::view(x, xt::keep(filtered_idxs), xt::all());
   this->_y_support = xt::filter(y, xt::not_equal(this->_alphas, 0));
   this->_alphas = xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
+}
+
+FloatArray SMO::fit_predict(const FloatArray& x, const FloatArray& y) {
+  this->fit(x, y);
+  return this->predict(x);
 }
 
 FloatArray SMO::predict(const FloatArray& x) {
