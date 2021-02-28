@@ -54,6 +54,14 @@ target_link_libraries(${CMAKE_PROJECT_NAME} xtensor xtensor-blas ${BLAS_LIBRARIE
 # Examples.
 add_subdirectory(examples)
 
+# Post-build command for bulding bindings.
+add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME} 
+    POST_BUILD
+    WORKING_DIRECTORY ../bindings/python 
+    COMMAND ./build.sh
+)
+
 # Install options.
 install(TARGETS ${PROJECT_NAME} EXPORT AdoConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}

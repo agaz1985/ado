@@ -36,10 +36,11 @@ class get_numpy_include(object):
         import numpy as np
         return np.get_include()
 
+
 ext_modules = [
     Extension(
         'ado',
-        ['src/main.cpp'],
+        ['src/ado.cpp', 'src/svm.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
@@ -96,15 +97,18 @@ class BuildExt(build_ext):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
         if ct == 'unix':
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
+            opts.append('-DVERSION_INFO="%s"' %
+                        self.distribution.get_version())
             opts.append(cpp_flag(self.compiler))
             if has_flag(self.compiler, '-fvisibility=hidden'):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
-            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+            opts.append('/DVERSION_INFO=\\"%s\\"' %
+                        self.distribution.get_version())
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
+
 
 setup(
     name='ado',
@@ -112,7 +116,7 @@ setup(
     author='Angelo Zuffianò',
     author_email='agaz1985@gmail.com',
     url='https://github.com/agaz1985/ado',
-    description= 'Yet another machine learning library',
+    description='Yet another machine learning library',
     long_description='A didactic C++ machine learning library',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.0.1', 'numpy'],
