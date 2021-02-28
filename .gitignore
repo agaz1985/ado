@@ -2,4 +2,5 @@ build/
 ado.code-workspace
 compile_commands.json
 .vscode/
+venv/
 

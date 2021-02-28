@@ -35,6 +35,8 @@ class SVM : public Model {
   SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
       const std::size_t max_steps, const std::size_t seed);
 
+  SVM() = default;
+
   // TODO: Add empty constructor, copy constructor and destructor, inheritance.
 
   void fit(const FloatArray& x, const FloatArray& y) override;
