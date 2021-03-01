@@ -20,6 +20,12 @@ SVM::SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
 }
 
 void SVM::fit(const FloatArray& x, const FloatArray& y) {
+  // Check target vector shape.
+  auto y_target = y;
+  if (y_target.shape().size() == 2) {
+    y_target = xt::col(y, 0);
+  }
+
   const std::size_t n_samples = x.shape(0);
   this->_alphas = xt::zeros<Float>({n_samples});
   this->_errors = xt::zeros<Float>({n_samples});
@@ -33,7 +39,7 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
     num_changed = 0;
     if (examine_all) {
       for (std::size_t idx = 0; idx < n_samples; ++idx) {
-        num_changed += this->examine_example(idx, x, y);
+        num_changed += this->examine_example(idx, x, y_target);
       }
     } else {
       const auto condition = ((this->_alphas < this->_tol) ||
@@ -42,7 +48,7 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
           xt::flatten_indices(xt::where(condition));
 
       for (std::size_t idx : filtered_indexes) {
-        num_changed += this->examine_example(idx, x, y);
+        num_changed += this->examine_example(idx, x, y_target);
       }
     }
 
@@ -55,7 +61,7 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
   auto filtered_idxs =
       xt::flatten_indices(xt::argwhere(xt::not_equal(this->_alphas, 0)));
   this->_x_support = xt::view(x, xt::keep(filtered_idxs), xt::all());
-  this->_y_support = xt::filter(y, xt::not_equal(this->_alphas, 0));
+  this->_y_support = xt::filter(y_target, xt::not_equal(this->_alphas, 0));
   this->_alphas = xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
 }
 

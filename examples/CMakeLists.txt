@@ -1,8 +1,4 @@
 cmake_minimum_required(VERSION 3.5)
+set(CMAKE_CXX_STANDARD 14)
 
-project(ado_examples)
-
-set(ADO_SVM_FITTING_EXAMPLE svm_fitting.cpp)
-add_executable(svm_fitting ${ADO_SVM_FITTING_EXAMPLE})
-target_link_libraries(svm_fitting ado)
-
+add_subdirectory(cpp)

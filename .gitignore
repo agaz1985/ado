@@ -4,3 +4,4 @@ compile_commands.json
 .vscode/
 .ipynb_checkpoints
 venv/
+*.svg
