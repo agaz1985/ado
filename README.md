@@ -1,5 +1,4 @@
 ![alt text](https://github.com/agaz1985/ado/blob/main/logo/logo.png?raw=true)
----
 
 **ado** is a C++ Machine Learning Library with Python bindings built from scratch by using the awsome [xtensor-stack](https://github.com/xtensor-stack).
 
