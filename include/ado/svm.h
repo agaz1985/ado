@@ -42,6 +42,7 @@ class SVM : public Model {
   void fit(const FloatArray& x, const FloatArray& y) override;
   FloatArray fit_predict(const FloatArray& x, const FloatArray& y) override;
   FloatArray predict(const FloatArray& x) override;
+  FloatArray prob(const FloatArray& x) override;
 
   FloatArray alphas() const;
 

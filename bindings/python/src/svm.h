@@ -19,11 +19,11 @@ struct SVM {
       const std::size_t max_steps, const std::size_t seed, const Float sigma);
 
   void fit(xt::pyarray<double> &x, xt::pyarray<double> &y);
-
   xt::pyarray<double> fit_predict(xt::pyarray<double> &x,
                                   xt::pyarray<double> &y);
 
   xt::pyarray<double> predict(xt::pyarray<double> &x);
+  xt::pyarray<double> prob(xt::pyarray<double> &x);
 
   ado::SVM _svm;
 };

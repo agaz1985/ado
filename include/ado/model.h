@@ -10,6 +10,7 @@ class Model {
   virtual void fit(const FloatArray& x, const FloatArray& y) = 0;
   virtual FloatArray fit_predict(const FloatArray& x, const FloatArray& y) = 0;
   virtual FloatArray predict(const FloatArray& x) = 0;
+  virtual FloatArray prob(const FloatArray& x) = 0;
 };
 
 }  // namespace ado

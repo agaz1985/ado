@@ -24,3 +24,7 @@ xt::pyarray<double> SVM::fit_predict(xt::pyarray<double> &x,
 xt::pyarray<double> SVM::predict(xt::pyarray<double> &x) {
   return this->_svm.predict(x);
 }
+
+xt::pyarray<double> SVM::prob(xt::pyarray<double> &x) {
+  return this->_svm.prob(x);
+}
