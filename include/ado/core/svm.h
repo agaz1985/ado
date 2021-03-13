@@ -1,13 +1,14 @@
-#ifndef ADO_SVM_H
-#define ADO_SVM_H
+#ifndef ADO_CORE_SVM_H
+#define ADO_CORE_SVM_H
 
 #include <memory>
 
-#include "ado/kernel.h"
-#include "ado/model.h"
+#include "ado/core/kernel.h"
+#include "ado/core/model.h"
 #include "ado/types.h"
 
 namespace ado {
+namespace core {
 
 /**
  * @brief Support Vector Machine (SVM) model.
@@ -90,6 +91,7 @@ class SVM : public Model {
   std::size_t _seed = 16;
 };
 
+}  // namespace core
 }  // namespace ado
 
-#endif  // ADO_SVM_H
+#endif  // ADO_CORE_SVM_H

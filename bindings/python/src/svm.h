@@ -4,15 +4,15 @@
 #include <memory>
 #include <string>
 
-#include "ado/svm.h"
+#include "ado/core/svm.h"
 #include "xtensor-python/pyarray.hpp"
 #include "xtensor/xarray.hpp"
 #include "xtensor/xmath.hpp"
 
 using ado::Float;
-using ado::Kernel;
-using ado::KernelLinear;
-using ado::KernelRBF;
+using ado::core::Kernel;
+using ado::core::KernelLinear;
+using ado::core::KernelRBF;
 
 struct SVM {
   SVM(const Float C, const Float tol, const std::string &kernel_type,
@@ -25,7 +25,7 @@ struct SVM {
   xt::pyarray<double> predict(xt::pyarray<double> &x);
   xt::pyarray<double> decision_function(xt::pyarray<double> &x);
 
-  ado::SVM _svm;
+  ado::core::SVM _svm;
 };
 
 #endif  // ADO_BINDINGS_PY_SVM

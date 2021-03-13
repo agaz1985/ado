@@ -1,9 +1,10 @@
-#ifndef ADO_MODEL_H
-#define ADO_MODEL_H
+#ifndef ADO_CORE_MODEL_H
+#define ADO_CORE_MODEL_H
 
 #include "ado/types.h"
 
 namespace ado {
+namespace core {
 
 class Model {
  public:
@@ -13,6 +14,7 @@ class Model {
   virtual FloatArray decision_function(const FloatArray& x) = 0;
 };
 
+}  // namespace core
 }  // namespace ado
 
-#endif  // ADO_MODEL_H
+#endif  // ADO_CORE_MODEL_H

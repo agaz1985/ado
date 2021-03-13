@@ -1,48 +1,24 @@
-#include <exception>
-#include <fstream>
-#include <iostream>
-#include <istream>
-#include <ostream>
-#include <string>
-#include <xtensor/xcsv.hpp>
+#include <iomanip>
 #include <xtensor/xindex_view.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xrandom.hpp>
 #include <xtensor/xview.hpp>
 
-#include "ado/kernel.h"
-#include "ado/svm.h"
+#include "ado/core/kernel.h"
+#include "ado/core/svm.h"
 #include "ado/types.h"
+#include "ado/utils/io.h"
 
-using ado::Float;
 using ado::FloatArray;
-using ado::Kernel;
-using ado::KernelLinear;
-using ado::KernelRBF;
-using ado::SVM;
+using ado::core::Kernel;
+using ado::core::KernelLinear;
+using ado::core::KernelRBF;
+using ado::core::SVM;
+using ado::utils::load_data;
 
 // TODO:
-// move set seed to library.
-// move load/save to library.
 // move normalize to library.
-// clean up includes.
 // ADD Reference to Data and disclaimer.
-// Fix prob bindings.
-
-FloatArray load_data(const std::string& filepath) {
-  std::fstream s(filepath.c_str(), std::ios::in);
-  if (!s) {
-    throw std::runtime_error("File does not exist !");
-  } else {
-    return xt::load_csv<double>(s);
-  }
-}
-
-void save_data(const FloatArray& data, const std::string& filepath) {
-  std::ofstream out_file;
-  out_file.open(filepath);
-  xt::dump_csv(out_file, data);
-}
 
 FloatArray normalize_data(const FloatArray& x) {
   auto c_max = xt::amax(x, 0);

@@ -1,8 +1,9 @@
-#include "ado/kernel.h"
+#include "ado/core/kernel.h"
 
 #include <xtensor-blas/xlinalg.hpp>
 
 namespace ado {
+namespace core {
 
 // Linear Kernel.
 
@@ -25,4 +26,5 @@ Float KernelRBF::operator()(const FloatArray& x1, const FloatArray& x2) const {
   return xt::exp(-s / (2 * std::pow(this->_sigma, 2)))(0);
 }
 
+}  // namespace core
 }  // namespace ado

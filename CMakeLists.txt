@@ -16,8 +16,9 @@ endif()
 set(ADO_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(ADO_SOURCE_FILES
-    ${ADO_SOURCE_DIR}/kernel.cpp
-    ${ADO_SOURCE_DIR}/svm.cpp
+    ${ADO_SOURCE_DIR}/core/kernel.cpp
+    ${ADO_SOURCE_DIR}/core/svm.cpp
+    ${ADO_SOURCE_DIR}/utils/io.cpp
 )
 
 # Third-party libraries.
@@ -56,7 +57,7 @@ add_subdirectory(examples)
 
 # Post-build command for bulding bindings.
 add_custom_command(
-    TARGET ${CMAKE_PROJECT_NAME} 
+    TARGET ${CMAKE_PROJECT_NAME}
     POST_BUILD
     WORKING_DIRECTORY ../bindings/python 
     COMMAND ./build.sh

@@ -1,4 +1,4 @@
-#include "ado/svm.h"
+#include "ado/core/svm.h"
 
 #include <stdexcept>
 #include <xtensor-blas/xlinalg.hpp>
@@ -8,6 +8,7 @@
 #include <xtensor/xtensor.hpp>
 
 namespace ado {
+namespace core {
 
 SVM::SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
          const std::size_t max_steps, const std::size_t seed)
@@ -298,4 +299,5 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
 
 FloatArray SVM::alphas() const { return this->_alphas; }
 
+}  // namespace core
 }  // namespace ado

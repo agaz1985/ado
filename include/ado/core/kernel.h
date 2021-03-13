@@ -1,9 +1,10 @@
-#ifndef ADO_KERNEL_H
-#define ADO_KERNEL_H
+#ifndef ADO_CORE_KERNEL_H
+#define ADO_CORE_KERNEL_H
 
 #include "ado/types.h"
 
 namespace ado {
+namespace core {
 
 enum class KernelType { Linear = 0, RBF = 1 };
 
@@ -33,6 +34,7 @@ class KernelRBF : public Kernel {
   Float _sigma = 5.0;
 };
 
+}  // namespace core
 }  // namespace ado
 
-#endif  // ADO_KERNEL_H
+#endif  // ADO_CORE_KERNEL_H
