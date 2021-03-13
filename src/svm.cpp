@@ -71,13 +71,13 @@ FloatArray SVM::fit_predict(const FloatArray& x, const FloatArray& y) {
 }
 
 FloatArray SVM::predict(const FloatArray& x) {
-  auto y_hat = this->prob(x);
+  auto y_hat = this->decision_function(x);
   filtration(y_hat, y_hat < 0) = -1;
   filtration(y_hat, y_hat > 0) = 1;
   return y_hat;
 }
 
-FloatArray SVM::prob(const FloatArray& x) {
+FloatArray SVM::decision_function(const FloatArray& x) {
   FloatArray predictions = xt::zeros<Float>({x.shape(0)});
 
   for (std::size_t idx = 0; idx < x.shape(0); ++idx) {

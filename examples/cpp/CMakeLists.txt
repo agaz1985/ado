@@ -7,5 +7,4 @@ add_executable(svm_fitting ${ADO_SVM_FITTING_EXAMPLE})
 target_link_libraries(svm_fitting ado)
 
 file(COPY ../data DESTINATION ${CMAKE_BINARY_DIR}/examples)
-
-
+file(COPY ../python DESTINATION ${CMAKE_BINARY_DIR}/examples)

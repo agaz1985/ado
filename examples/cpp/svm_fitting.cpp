@@ -55,7 +55,7 @@ void preprocess_labels(FloatArray& y) { filtration(y, xt::equal(y, 0)) = -1; }
 int main(int argc, char* argv[]) {
   // Define the random seed.
   const auto seed = 16;
-  xt::random::seed(seed);  // TODO: move this to library.
+  xt::random::seed(seed);
 
   // Define number of training and testing samples.
   const auto n_train_samples = 100;
@@ -98,5 +98,6 @@ int main(int argc, char* argv[]) {
   const auto accuracy =
       xt::count_nonzero(xt::cast<uint8_t>(xt::equal(y_hat, y_test))) /
       (1.f * n_test_samples);
-  std::cout << std::setprecision(2) << "Accuracy: " << accuracy * 100 << " %" << std::endl;
+  std::cout << std::setprecision(2) << "Accuracy: " << accuracy * 100 << " %"
+            << std::endl;
 }

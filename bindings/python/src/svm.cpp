@@ -25,6 +25,6 @@ xt::pyarray<double> SVM::predict(xt::pyarray<double> &x) {
   return this->_svm.predict(x);
 }
 
-xt::pyarray<double> SVM::prob(xt::pyarray<double> &x) {
-  return this->_svm.prob(x);
+xt::pyarray<double> SVM::decision_function(xt::pyarray<double> &x) {
+  return this->_svm.decision_function(x);
 }

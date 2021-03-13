@@ -23,7 +23,7 @@ struct SVM {
                                   xt::pyarray<double> &y);
 
   xt::pyarray<double> predict(xt::pyarray<double> &x);
-  xt::pyarray<double> prob(xt::pyarray<double> &x);
+  xt::pyarray<double> decision_function(xt::pyarray<double> &x);
 
   ado::SVM _svm;
 };
