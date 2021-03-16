@@ -8,6 +8,7 @@
 #include "ado/core/svm.h"
 #include "ado/types.h"
 #include "ado/utils/io.h"
+#include "ado/utils/logger.h"
 
 using ado::FloatArray;
 using ado::core::Kernel;
@@ -15,6 +16,9 @@ using ado::core::KernelLinear;
 using ado::core::KernelRBF;
 using ado::core::SVM;
 using ado::utils::load_data;
+using ado::utils::Logger;
+using ado::utils::LogLevel;
+using ado::utils::LogStreamHandler;
 
 // TODO:
 // move normalize to library.
@@ -29,6 +33,12 @@ FloatArray normalize_data(const FloatArray& x) {
 void preprocess_labels(FloatArray& y) { filtration(y, xt::equal(y, 0)) = -1; }
 
 int main(int argc, char* argv[]) {
+  // Define the logger and register the standard output and error handler.
+  auto stream_handler = std::make_unique<LogStreamHandler>(LogLevel::Debug);
+
+  auto& logger = Logger::get();
+  logger.register_handler(std::move(stream_handler));
+
   // Define the random seed.
   const auto seed = 16;
   xt::random::seed(seed);
@@ -38,7 +48,8 @@ int main(int argc, char* argv[]) {
   const auto n_test_samples = 30;
 
   // Load and shuffle the training data.
-  std::cout << "Loading training data..." << std::endl;
+  logger << LogLevel::Info << "Loading training data...";
+
   FloatArray training_data = load_data("../data/occupancy/datatraining.csv");
   xt::random::shuffle(training_data);
   FloatArray x_train =
@@ -50,7 +61,8 @@ int main(int argc, char* argv[]) {
   preprocess_labels(y_train);
 
   // Load and shuffle the testing data.
-  std::cout << "Loading test data..." << std::endl;
+  logger << LogLevel::Info << "Loading test data...";
+
   FloatArray test_data = load_data("../data/occupancy/datatest2.csv");
   xt::random::shuffle(test_data);
   FloatArray x_test =
@@ -63,17 +75,18 @@ int main(int argc, char* argv[]) {
   // Define the kernel.
   auto kernel = std::make_unique<KernelLinear>();
 
-  std::cout << "Fitting the SVM model..." << std::endl;
+  logger << LogLevel::Info << "Fitting the SVM model...";
   auto svm = SVM(1.0, 1e-4, std::move(kernel), 100, seed);
   svm.fit(x_train, y_train);
 
-  std::cout << "Run inference on the test set..." << std::endl;
+  logger << LogLevel::Info << "Running inference on test data...";
   auto y_hat = svm.predict(x_test);
 
   // Computing the accuracy on the test set.
   const auto accuracy =
       xt::count_nonzero(xt::cast<uint8_t>(xt::equal(y_hat, y_test))) /
       (1.f * n_test_samples);
-  std::cout << std::setprecision(2) << "Accuracy: " << accuracy * 100 << " %"
-            << std::endl;
+
+  logger << LogLevel::Info << std::setprecision(2)
+         << "Accuracy: " << accuracy * 100 << " %";
 }
