@@ -18,6 +18,9 @@ set(ADO_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(ADO_SOURCE_FILES
     ${ADO_SOURCE_DIR}/core/kernel.cpp
     ${ADO_SOURCE_DIR}/core/svm.cpp
+    ${ADO_SOURCE_DIR}/utils/logger.cpp
+    ${ADO_SOURCE_DIR}/utils/logger_buffer.cpp
+    ${ADO_SOURCE_DIR}/utils/logger_handler.cpp
     ${ADO_SOURCE_DIR}/utils/io.cpp
 )
 

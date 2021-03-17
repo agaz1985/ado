@@ -8,6 +8,8 @@ namespace core {
 
 class Model {
  public:
+  virtual ~Model() = default;
+
   virtual void fit(const FloatArray& x, const FloatArray& y) = 0;
   virtual FloatArray fit_predict(const FloatArray& x, const FloatArray& y) = 0;
   virtual FloatArray predict(const FloatArray& x) = 0;

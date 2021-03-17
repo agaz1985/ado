@@ -38,8 +38,6 @@ class SVM : public Model {
 
   SVM() = default;
 
-  // TODO: Add empty constructor, copy constructor and destructor, inheritance.
-
   void fit(const FloatArray& x, const FloatArray& y) override;
   FloatArray fit_predict(const FloatArray& x, const FloatArray& y) override;
   FloatArray predict(const FloatArray& x) override;

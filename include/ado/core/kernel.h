@@ -10,6 +10,8 @@ enum class KernelType { Linear = 0, RBF = 1 };
 
 class Kernel {
  public:
+  virtual ~Kernel() = default;
+
   Kernel(const KernelType type) : _type(type){};
   virtual Float operator()(const FloatArray& x1,
                            const FloatArray& x2) const = 0;

@@ -7,8 +7,16 @@
 #include <xtensor/xsort.hpp>
 #include <xtensor/xtensor.hpp>
 
+#include "ado/utils/logger.h"
+
+namespace {
+auto& logger = ado::utils::Logger::get();
+}
+
 namespace ado {
 namespace core {
+
+using ado::utils::LogLevel;
 
 SVM::SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
          const std::size_t max_steps, const std::size_t seed)
@@ -35,8 +43,14 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
   bool examine_all = true;
   std::size_t remaining_steps = this->_max_steps;
 
+  logger << LogLevel::Info << "Fitting " << n_samples
+         << " samples for a maximum of " << this->_max_steps << " steps.";
+
   while ((num_changed > 0 || examine_all) && (remaining_steps > 0)) {
     --remaining_steps;
+
+    logger << LogLevel::Debug << "Remaining steps: " << remaining_steps;
+
     num_changed = 0;
     if (examine_all) {
       for (std::size_t idx = 0; idx < n_samples; ++idx) {
