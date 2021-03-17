@@ -21,20 +21,19 @@ using ado::utils::Logger;
 using ado::utils::LogLevel;
 using ado::utils::LogStreamHandler;
 
-// TODO:
-// move normalize to library.
-// ADD Reference to Data and disclaimer.
-
-FloatArray normalize_data(const FloatArray& x) {
+FloatArray column_wise_normalization(const FloatArray& x) {
   auto c_max = xt::amax(x, 0);
   auto c_min = xt::amin(x, 0);
   return xt::eval((x - c_min) / (c_max - c_min));
 }
 
-void preprocess_labels(FloatArray& y) { filtration(y, xt::equal(y, 0)) = -1; }
+void target_preprocessing(FloatArray& y) {
+  filtration(y, xt::equal(y, 0)) = -1;
+}
 
 int main(int argc, char* argv[]) {
-  // Define the logger and register the standard output and error handler.
+  // Define the logger and register the file, standard output and error
+  // handlers.
   auto stream_handler = std::make_unique<LogStreamHandler>(LogLevel::Info);
   auto file_handler = std::make_unique<LogFileHandler>(
       "./log_cout.log", "./log_cerr.log", LogLevel::Debug);
@@ -61,8 +60,8 @@ int main(int argc, char* argv[]) {
   FloatArray y_train =
       xt::view(training_data, xt::range(0, n_train_samples), 5);
 
-  x_train = normalize_data(x_train);
-  preprocess_labels(y_train);
+  x_train = column_wise_normalization(x_train);
+  target_preprocessing(y_train);
 
   // Load and shuffle the testing data.
   logger << LogLevel::Info << "Loading test data...";
@@ -73,8 +72,8 @@ int main(int argc, char* argv[]) {
       xt::view(test_data, xt::range(0, n_test_samples), xt::range(0, 5));
   FloatArray y_test = xt::view(test_data, xt::range(0, n_test_samples), 5);
 
-  x_test = normalize_data(x_test);
-  preprocess_labels(y_test);
+  x_test = column_wise_normalization(x_test);
+  target_preprocessing(y_test);
 
   // Define the kernel.
   auto kernel = std::make_unique<KernelLinear>();

@@ -11,6 +11,6 @@ If you are looking for an optimized, multi-platform, memory-efficient, heavely t
 
 # Getting Started
 ## Build and install
-## C++ Sound Check
-## Python Sound Check
+## C++ First example
+## Python First example
 ## More Examples

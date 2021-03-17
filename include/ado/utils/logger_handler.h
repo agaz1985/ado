@@ -13,6 +13,7 @@ enum class LogLevel { Debug = 0, Info = 1, Error = 2 };
 class LoggerHandler {
  public:
   LoggerHandler(const LogLevel level);
+  virtual ~LoggerHandler() = default;
 
   void log(const std::string& message, const LogLevel level);
 
