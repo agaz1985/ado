@@ -1,6 +1,7 @@
 #ifndef ADO_UTILS_LOG_HANDLER_H
 #define ADO_UTILS_LOG_HANDLER_H
 
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -13,8 +14,7 @@ class LoggerHandler {
  public:
   LoggerHandler(const LogLevel level);
 
-  void log(const std::string& message, const LogLevel level,
-           const std::string& file, const std::string& line);
+  void log(const std::string& message, const LogLevel level);
 
   void set_level(const LogLevel level);
 
@@ -28,12 +28,18 @@ class LoggerHandler {
 
 class LogFileHandler : public LoggerHandler {
  public:
-  LogFileHandler(const std::string& filepath, const LogLevel level);
+  LogFileHandler(const std::string& filepath_cout,
+                 const std::string& filepath_cerr, const LogLevel level);
+
+  ~LogFileHandler();
 
  protected:
   void virtual log_message(const std::string& message);
-
   void virtual log_error(const std::string& message);
+
+ private:
+  std::ofstream _log_cout;
+  std::ofstream _log_cerr;
 };
 
 class LogStreamHandler : public LoggerHandler {
@@ -42,7 +48,6 @@ class LogStreamHandler : public LoggerHandler {
 
  protected:
   void virtual log_message(const std::string& message);
-
   void virtual log_error(const std::string& message);
 };
 

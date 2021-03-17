@@ -18,12 +18,11 @@ void Logger::register_handler(std::unique_ptr<LoggerHandler> handler) {
   this->_handlers.emplace_back(std::move(handler));
 }
 
-void Logger::log(const std::string& message, const LogLevel level,
-                 const std::string& file, const std::string& line) {
+void Logger::log(const std::string& message, const LogLevel level) {
   this->_mutex.lock();
   for (auto handler = this->_handlers.begin(); handler != this->_handlers.end();
        ++handler) {
-    (*handler)->log(message, level, file, line);
+    (*handler)->log(message, level);
   }
   this->_mutex.unlock();
 }

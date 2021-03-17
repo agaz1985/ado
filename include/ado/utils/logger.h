@@ -21,8 +21,7 @@ class Logger {
   LoggerBuffer operator<<(const LogLevel& type) {
     return LoggerBuffer(type,
                         std::bind(&Logger::log, this, std::placeholders::_1,
-                                  std::placeholders::_2, std::placeholders::_3,
-                                  std::placeholders::_4));
+                                  std::placeholders::_2));
   }
 
  private:
@@ -31,8 +30,7 @@ class Logger {
   Logger(const Logger&&) = delete;
   Logger& operator=(const Logger&) = delete;
 
-  void log(const std::string& message, const LogLevel level,
-           const std::string& file, const std::string& line);
+  void log(const std::string& message, const LogLevel level);
 
   std::vector<std::unique_ptr<LoggerHandler>> _handlers;
   std::mutex _mutex;

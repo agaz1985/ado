@@ -14,8 +14,7 @@ class LoggerBuffer {
   LoggerBuffer(const LoggerBuffer& buffer);
 
   LoggerBuffer(const LogLevel& level,
-               std::function<void(const std::string&, LogLevel,
-                                  const std::string&, const std::string&)>
+               std::function<void(const std::string&, LogLevel)>
                    log_function);
 
   ~LoggerBuffer();
@@ -28,8 +27,7 @@ class LoggerBuffer {
 
  private:
   std::stringstream _string_stream;
-  std::function<void(const std::string&, LogLevel, const std::string&,
-                     const std::string&)>
+  std::function<void(const std::string&, LogLevel)>
       _log;
   LogLevel _level = LogLevel::Debug;
 };

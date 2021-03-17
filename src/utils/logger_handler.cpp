@@ -1,4 +1,5 @@
 #include <ctime>
+#include <exception>
 #include <iomanip>
 #include <map>
 #include <string>
@@ -21,15 +22,12 @@ namespace utils {
 
 LoggerHandler::LoggerHandler(const LogLevel level) : _level(level){};
 
-void LoggerHandler::log(const std::string& message, const LogLevel level,
-                        const std::string& file, const std::string& line) {
+void LoggerHandler::log(const std::string& message, const LogLevel level) {
   std::stringstream formatted_message;
   std::time_t t = std::time(nullptr);
   std::tm tm = *std::localtime(&t);
   formatted_message << std::put_time(&tm, "%d-%m-%YT%H:%M:%S") << " - "
-                    << "(" << file << ":" << line << ")"
-                    << " - " << LogLevelMap.find(level)->second << " - "
-                    << message;
+                    << LogLevelMap.find(level)->second << " - " << message;
 
   switch (level) {
     case LogLevel::Debug: {
@@ -57,13 +55,40 @@ void LoggerHandler::set_level(const LogLevel level) { this->_level = level; }
 
 // LogFileHandler
 
-LogFileHandler::LogFileHandler(const std::string& filepath,
+LogFileHandler::LogFileHandler(const std::string& filepath_cout,
+                               const std::string& filepath_cerr,
                                const LogLevel level)
-    : LoggerHandler(level){};
+    : LoggerHandler(level), _log_cout(filepath_cout), _log_cerr(filepath_cerr) {
+  if (!this->_log_cout.is_open()) {
+    throw std::invalid_argument("Unable to open log file " + filepath_cout);
+  }
+  if (!this->_log_cerr.is_open()) {
+    throw std::invalid_argument("Unable to open log file " + filepath_cerr);
+  }
+};
 
-void LogFileHandler::log_message(const std::string& message) {}
+LogFileHandler::~LogFileHandler() {
+  if (this->_log_cout.is_open()) {
+    this->_log_cout.close();
+  }
+  if (this->_log_cerr.is_open()) {
+    this->_log_cerr.close();
+  }
+}
 
-void LogFileHandler::log_error(const std::string& message) {}
+void LogFileHandler::log_message(const std::string& message) {
+  if (this->_log_cout.is_open()) {
+    this->_log_cout << message << '\n';
+    this->_log_cout.flush();
+  }
+}
+
+void LogFileHandler::log_error(const std::string& message) {
+  if (this->_log_cerr.is_open()) {
+    this->_log_cerr << message << '\n';
+    this->_log_cerr.flush();
+  }
+}
 
 // LogStreamHandler
 

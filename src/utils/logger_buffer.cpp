@@ -10,14 +10,12 @@ LoggerBuffer::LoggerBuffer(const LoggerBuffer& buffer)
 
 LoggerBuffer::LoggerBuffer(
     const LogLevel& level,
-    std::function<void(const std::string&, LogLevel, const std::string&,
-                       const std::string&)>
+    std::function<void(const std::string&, LogLevel)>
         log_function)
     : _level(level), _log(log_function) {}
 
 LoggerBuffer::~LoggerBuffer() {
-  this->_log(this->_string_stream.str(), this->_level, __func__,
-             std::to_string(__LINE__));
+  this->_log(this->_string_stream.str(), this->_level);
 }
 
 }  // namespace utils

@@ -16,6 +16,7 @@ using ado::core::KernelLinear;
 using ado::core::KernelRBF;
 using ado::core::SVM;
 using ado::utils::load_data;
+using ado::utils::LogFileHandler;
 using ado::utils::Logger;
 using ado::utils::LogLevel;
 using ado::utils::LogStreamHandler;
@@ -34,10 +35,13 @@ void preprocess_labels(FloatArray& y) { filtration(y, xt::equal(y, 0)) = -1; }
 
 int main(int argc, char* argv[]) {
   // Define the logger and register the standard output and error handler.
-  auto stream_handler = std::make_unique<LogStreamHandler>(LogLevel::Debug);
+  auto stream_handler = std::make_unique<LogStreamHandler>(LogLevel::Info);
+  auto file_handler = std::make_unique<LogFileHandler>(
+      "./log_cout.log", "./log_cerr.log", LogLevel::Debug);
 
   auto& logger = Logger::get();
   logger.register_handler(std::move(stream_handler));
+  logger.register_handler(std::move(file_handler));
 
   // Define the random seed.
   const auto seed = 16;
