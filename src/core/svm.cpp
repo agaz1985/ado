@@ -11,7 +11,16 @@
 
 namespace {
 auto& logger = ado::utils::Logger::get();
+
+using ado::Float;
+
+Float clip_value(const Float value, const Float high, const Float low) {
+  if (value < low) return low;
+  if (value > high) return high;
+  return value;
 }
+
+}  // namespace
 
 namespace ado {
 namespace core {
@@ -204,12 +213,6 @@ Float SVM::kernel_function(const FloatArray& x1, const FloatArray& x2) const {
   return this->_kernel->operator()(x1, x2);
 }
 
-Float SVM::clip_value(const Float value, const Float high, const Float low) {
-  if (value < low) return low;
-  if (value > high) return high;
-  return value;
-}
-
 std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
                            const FloatArray& x, const FloatArray& y,
                            const Float& y2, const Float& alph2,
@@ -257,7 +260,7 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
 
   Float a2 = 0.0;
   if (eta > 0) {
-    a2 = this->clip_value(alph2 + y2 * (e1 - e2) / eta, H, L);
+    a2 = clip_value(alph2 + y2 * (e1 - e2) / eta, H, L);
   } else {
     const auto Lobj =
         this->compute_gamma(alph1, alph2, L, k11, k12, k22, s, y1, y2, e1, e2);
@@ -310,8 +313,6 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
 
   return 1;
 }
-
-FloatArray SVM::alphas() const { return this->_alphas; }
 
 }  // namespace core
 }  // namespace ado
