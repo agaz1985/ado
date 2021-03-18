@@ -15,8 +15,8 @@ namespace core {
  *
  * Implementation of a binary Support Vector Machine (SVM) based on the
  * Sequential Minimal Optimization (SMO) algorithm used for solving the
- * quadratic programming (QP) problem generated during training. The SMO
- * implementation is based on:
+ * quadratic programming (QP) problem generated when training an SVM.
+ * The SMO implementation is based on:
  * Platt, John. "Sequential minimal optimization: A fast algorithm for training
  * support vector machines." (1998).
  * https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-98-14.pdf
@@ -38,39 +38,91 @@ class SVM : public Model {
 
   SVM() = default;
 
+  /**
+   * @brief Fit the model.
+   *
+   * @param x multi-dimensional array containing the training data. The array
+   * must have shape (N,M), with N number of samples, and M number of features.
+   * @param y array containing the target labels. The array must have shape
+   * (N,1) or (N) and binary values [-1, 1]. With N number of samples.
+   */
   void fit(const FloatArray& x, const FloatArray& y) override;
+
+  /**
+   * @brief Fit the model and run inference.
+   *
+   * @param x multi-dimensional array containing the training data. The array
+   * must have shape (N,M), with N number of samples, and M number of features.
+   * @param y array containing the target labels. The array must have shape
+   * (N,1) or (N) and binary values [-1, 1]. With N number of samples.
+   * @return FloatArray array containing the predicted labels. The array has
+   * shape (N) and binary values [-1, 1]. With N number of samples.
+   */
   FloatArray fit_predict(const FloatArray& x, const FloatArray& y) override;
+
+  /**
+   * @brief Run inference and return the predicted labels.
+   *
+   * @param x multi-dimensional array containing the input data. The array
+   * must have shape (N,M), with N number of samples, and M number of features.
+   * @return FloatArray array containing the predicted labels. The array has
+   * shape (N) and binary values [-1, 1]. With N number of samples.
+   */
   FloatArray predict(const FloatArray& x) override;
+
+  /**
+   * @brief Run inference and return the un-thresholded predicted values.
+   *
+   * @param x multi-dimensional array containing the input data. The array
+   * must have shape (N,M), with N number of samples, and M number of features.
+   * @return FloatArray array containing the un-thresholded predicted values.
+   * The array has shape (N) and real values. With N number of
+   * samples.
+   */
   FloatArray decision_function(const FloatArray& x) override;
 
-  FloatArray alphas() const;
-
  private:
+  /**
+   * @brief Evaluate the model.
+   */
   Float eval(const FloatArray& x, const FloatArray& y, const FloatArray& alphas,
              const FloatArray& xi) const;
 
+  /**
+   * @brief Compute the bias term.
+   */
   Float compute_b(const Float& e1, const Float& e2, const Float& y1,
                   const Float& a1, const Float& alph1, const Float& y2,
                   const Float& a2, const Float& alph2, const Float& k11,
                   const Float& k12, const Float& k22) const;
-
+  /**
+   * @brief Compute the weight term.
+   */
   FloatArray compute_w(const FloatArray& x1, const FloatArray& x2,
                        const FloatArray& y1, const FloatArray& y2,
                        const FloatArray& a1, const FloatArray& a2,
                        const FloatArray& alph1, const FloatArray& alph2) const;
-
+  /**
+   * @brief Compute the gamma term.
+   */
   Float compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
                       const Float& k11, const Float& k12, const Float& k22,
                       const Float& s, const Float& y1, const Float& y2,
                       const Float& e1, const Float& e2) const;
-
+  /**
+   * @brief Evaluate the kernel function.
+   */
   Float kernel_function(const FloatArray& x1, const FloatArray& x2) const;
 
-  static Float clip_value(const Float value, const Float high, const Float low);
-
+  /**
+   * @brief Examine example step of the SMO algorithm.
+   */
   std::int8_t examine_example(const std::size_t i2, const FloatArray& x,
                               const FloatArray& y);
 
+  /**
+   * @brief Take step of the SMO algorithm.
+   */
   std::int8_t take_step(const std::size_t i1, const std::size_t i2,
                         const FloatArray& x, const FloatArray& y,
                         const Float& y2, const Float& alph2, const Float& e2);
@@ -78,7 +130,6 @@ class SVM : public Model {
   Float _C = 1.0;
   Float _tol = 1e-3;
   std::unique_ptr<Kernel> _kernel = std::make_unique<KernelLinear>();
-  Float _sigma = 1.0;
   FloatArray _alphas = FloatArray();
   Float _b = 0.0;
   FloatArray _w = FloatArray();
