@@ -23,7 +23,7 @@ If you are looking for an optimized, multi-platform, memory-efficient, heavely t
     cd ..
     mkdir build && cd build
     ```
-4. Build the library, the bindings, the examples and the documentation:
+4. Build the library, the bindings, the tests, the examples and the documentation:
    ```bash
     cmake ../ado && make -j8
     ```
