@@ -47,6 +47,7 @@ ext_modules = [
             get_pybind_include(user=True),
             get_numpy_include(),
             "../../include",
+            "../../venv/include",
             os.path.join(sys.prefix, 'include'),
             os.path.join(sys.prefix, 'Library', 'include')
         ],

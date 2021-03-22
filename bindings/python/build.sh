@@ -1,7 +1,7 @@
 #!/bin/bash
 
 build_dir=../../build/bindings/python
-venv_dir=../../venv
+venv_dir=../../bindings_venv
 
 if [ ! -d $build_dir ] 
 then
@@ -11,11 +11,11 @@ fi
 if [ ! -d $venv_dir ] 
 then
     echo "Creating a conda environment in " $venv_dir
-    conda create -p $venv_dir python=3.8
+    conda create -y -p $venv_dir python=3.8
 fi
 
 echo "Using conda environment in " $venv_dir
-activate $venv_dir
+source activate $venv_dir
 pip install -r requirements.txt
 
 echo "Create the Python package in " $build_dir
