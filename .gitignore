@@ -3,5 +3,7 @@ ado.code-workspace
 compile_commands.json
 .vscode/
 .ipynb_checkpoints
+bindings_venv/
 venv/
 *.svg
+

@@ -1,9 +1,3 @@
-Dataset: Accurate occupancy detection of an office room from light, temperature, humidity and CO2 measurements using statistical learning models. Luis M. Candanedo, VÃ©ronique Feldheim. Energy and Buildings. Volume 112, 15 January 2016, Pages 28-39.
-
-Link: https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+
-
-Header: Temperature,Humidity,Light,CO2,HumidityRatio,Occupancy
-
-Reference:
-Accurate occupancy detection of an office room from light, temperature, humidity and CO2 measurements using statistical learning models. Luis M. Candanedo, VÃ©ronique Feldheim. Energy and Buildings. Volume 112, 15 January 2016, Pages 28-39.
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:4f89214c839c20fa6d9af5bab418017b1ebde24f72f7aa25e9d60b9a7f08f737
+size 640
