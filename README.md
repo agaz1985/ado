@@ -31,6 +31,6 @@ If you are looking for an optimized, multi-platform, memory-efficient, heavely t
 ## Python First example
 ## More Examples
 
-| Method | Example |  |
+| Algorithm | Example |  |
 | ----------- | ----------- | ----------- |
 | SVM | svm_synthetic_data | ![alt text](https://github.com/agaz1985/ado/blob/main/imgs/svm_synthetic.png?raw=true)|
