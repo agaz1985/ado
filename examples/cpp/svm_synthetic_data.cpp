@@ -12,8 +12,7 @@
 
 using ado::FloatArray;
 using ado::core::Kernel;
-using ado::core::KernelLinear;
-using ado::core::KernelRBF;
+using ado::core::KernelPolynomial;
 using ado::core::SVM;
 using ado::utils::load_data;
 using ado::utils::LogFileHandler;
@@ -75,8 +74,8 @@ int main(int argc, char* argv[]) {
   x_test = column_wise_normalization(x_test);
   target_preprocessing(y_test);
 
-  // Define the kernel.
-  auto kernel = std::make_unique<KernelLinear>();
+  // Define a linear kernel.
+  auto kernel = std::make_unique<KernelPolynomial>(1.0, 1.0, 0.0);
 
   logger << LogLevel::Info << "Fitting the SVM model...";
   auto svm = SVM(1.0, 1e-4, std::move(kernel), 100, seed);

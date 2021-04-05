@@ -6,7 +6,7 @@
 namespace ado {
 namespace core {
 
-enum class KernelType { Linear = 0, RBF = 1 };
+enum class KernelType { Polynomial = 0, RBF = 1, Sigmoid = 2 };
 
 class Kernel {
  public:
@@ -14,26 +14,42 @@ class Kernel {
 
   Kernel(const KernelType type) : _type(type){};
   virtual Float operator()(const FloatArray& x1,
-                           const FloatArray& x2) const = 0;
+                                const FloatArray& x2) const = 0;
   inline KernelType type() const { return this->_type; }
 
  private:
   KernelType _type;
 };
 
-class KernelLinear : public Kernel {
+class KernelPolynomial : public Kernel {
  public:
-  KernelLinear();
-  Float operator()(const FloatArray& x1, const FloatArray& x2) const override;
+  explicit KernelPolynomial(const Float degree, const Float alpha,
+                            const Float bias);
+  virtual Float operator()(const FloatArray& x1, const FloatArray& x2) const override;
+
+ private:
+  Float _degree = 1.0;
+  Float _alpha = 1.0;
+  Float _bias = 0.0;
 };
 
 class KernelRBF : public Kernel {
  public:
   explicit KernelRBF(const Float sigma);
-  Float operator()(const FloatArray& x1, const FloatArray& x2) const override;
+  virtual Float operator()(const FloatArray& x1, const FloatArray& x2) const override;
 
  private:
-  Float _sigma = 5.0;
+  Float _sigma = 1.0;
+};
+
+class KernelSigmoid : public Kernel {
+ public:
+  explicit KernelSigmoid(const Float alpha, const Float bias);
+  virtual Float operator()(const FloatArray& x1, const FloatArray& x2) const override;
+
+ private:
+  Float _alpha = 1.0;
+  Float _bias = 0.0;
 };
 
 }  // namespace core

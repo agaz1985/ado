@@ -8,6 +8,7 @@ then
     conda create -y -p $venv_dir
     source activate $venv_dir
     echo "Install the required C++ libraries..."
-    conda install -y -c conda-forge blas doxygen xtensor xtensor-blas xtensor-python
+    conda install -y nomkl
+    conda install -y -c conda-forge openblas doxygen xtensor xtensor-blas xtensor-python
 fi
 

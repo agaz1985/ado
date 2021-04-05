@@ -190,14 +190,6 @@ Float SVM::compute_b(const Float& e1, const Float& e2, const Float& y1,
     return (b1 + b2) / 2.0;
 }
 
-FloatArray SVM::compute_w(const FloatArray& x1, const FloatArray& x2,
-                          const FloatArray& y1, const FloatArray& y2,
-                          const FloatArray& a1, const FloatArray& a2,
-                          const FloatArray& alph1,
-                          const FloatArray& alph2) const {
-  return this->_w + y1 * (a1 - alph1) * x1 + y2 * (a2 - alph2) * x2;
-}
-
 Float SVM::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
                          const Float& k11, const Float& k12, const Float& k22,
                          const Float& s, const Float& y1, const Float& y2,
@@ -304,12 +296,6 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
 
   this->_alphas(i1) = a1;
   this->_alphas(i2) = a2;
-
-  if (this->_kernel->type() == KernelType::Linear) {
-    this->_w =
-        this->compute_w(xt::view(x, i1, xt::all()), xt::view(x, i2, xt::all()),
-                        y1, y2, a1, a2, alph1, alph2);
-  }
 
   return 1;
 }

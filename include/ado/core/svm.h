@@ -96,13 +96,6 @@ class SVM : public Model {
                   const Float& a2, const Float& alph2, const Float& k11,
                   const Float& k12, const Float& k22) const;
   /**
-   * @brief Compute the weight term.
-   */
-  FloatArray compute_w(const FloatArray& x1, const FloatArray& x2,
-                       const FloatArray& y1, const FloatArray& y2,
-                       const FloatArray& a1, const FloatArray& a2,
-                       const FloatArray& alph1, const FloatArray& alph2) const;
-  /**
    * @brief Compute the gamma term.
    */
   Float compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
@@ -129,10 +122,10 @@ class SVM : public Model {
 
   Float _C = 1.0;
   Float _tol = 1e-3;
-  std::unique_ptr<Kernel> _kernel = std::make_unique<KernelLinear>();
+  std::unique_ptr<Kernel> _kernel =
+      std::make_unique<KernelPolynomial>(1.0, 1.0, 0.0);
   FloatArray _alphas = FloatArray();
   Float _b = 0.0;
-  FloatArray _w = FloatArray();
   FloatArray _errors = FloatArray();
   FloatArray _x_support = FloatArray();
   FloatArray _y_support = FloatArray();

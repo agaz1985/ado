@@ -10,13 +10,11 @@
 #include "xtensor/xmath.hpp"
 
 using ado::Float;
-using ado::core::Kernel;
-using ado::core::KernelLinear;
-using ado::core::KernelRBF;
 
 struct SVM {
   SVM(const Float C, const Float tol, const std::string &kernel_type,
-      const std::size_t max_steps, const std::size_t seed, const Float sigma);
+      const std::size_t max_steps, const std::size_t seed, const Float sigma,
+      const Float degree, const Float alpha, const Float bias);
 
   void fit(xt::pyarray<double> &x, xt::pyarray<double> &y);
   xt::pyarray<double> fit_predict(xt::pyarray<double> &x,
