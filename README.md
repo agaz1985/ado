@@ -32,4 +32,5 @@ If you are looking for an optimized, multi-platform, memory-efficient, heavely t
 ## More Examples
 
 ### Support Vector Machine
-![Support Vector Machine applied to occupnacy data.](https://github.com/agaz1985/ado/blob/main/imgs/svm_synthetic.png?raw=true){width=80%}
+![Support Vector Machine applied to occupnacy data.](https://github.com/agaz1985/ado/blob/main/imgs/svm_synthetic.png?raw=true | width=80%)
+
