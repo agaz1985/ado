@@ -7,40 +7,41 @@ namespace core {
 
 // Polynomial Kernel.
 
-KernelPolynomial::KernelPolynomial(const Float degree, const Float alpha,
-                                   const Float bias)
+KernelPolynomial::KernelPolynomial(const Float degree, const Float gamma,
+                                   const Float coeff)
     : Kernel(KernelType::Polynomial),
       _degree(degree),
-      _alpha(alpha),
-      _bias(bias){};
+      _gamma(gamma),
+      _coeff(coeff) {}
 
-Float KernelPolynomial::operator()(const FloatArray& x1,
-                                   const FloatArray& x2) const {
+FloatArray KernelPolynomial::operator()(const FloatArray& x1,
+                                        const FloatArray& x2) const {
   auto s = xt::linalg::dot(x1, xt::transpose(x2));
-  return xt::pow(this->_alpha * s + this->_bias, this->_degree)(0);
+  return xt::pow(this->_gamma * s + this->_coeff, this->_degree);
 }
 
 // RBF Kernel.
 
-KernelRBF::KernelRBF(const Float sigma)
-    : Kernel(KernelType::RBF), _sigma(sigma){};
+KernelRBF::KernelRBF(const Float gamma)
+    : Kernel(KernelType::RBF), _gamma(gamma) {}
 
-Float KernelRBF::operator()(const FloatArray& x1, const FloatArray& x2) const {
+FloatArray KernelRBF::operator()(const FloatArray& x1,
+                                 const FloatArray& x2) const {
   FloatArray x2_t = xt::transpose(x2);
-  auto s = xt::linalg::dot(x1, xt::transpose(x1)) + xt::linalg::dot(x2, x2_t) -
-           2 * xt::linalg::dot(x1, x2_t);
-  return xt::exp(-s / (2 * std::pow(this->_sigma, 2)))(0);
+  auto distance = xt::linalg::dot(x1, xt::transpose(x1)) +
+                  xt::linalg::dot(x2, x2_t) - 2 * xt::linalg::dot(x1, x2_t);
+  return xt::exp(-distance / (2 * std::pow(this->_gamma, 2)));
 }
 
 // Sigmoid Kernel.
 
-KernelSigmoid::KernelSigmoid(const Float alpha, const Float bias)
-    : Kernel(KernelType::Sigmoid), _alpha(alpha), _bias(bias){};
+KernelSigmoid::KernelSigmoid(const Float gamma, const Float coeff)
+    : Kernel(KernelType::Sigmoid), _gamma(gamma), _coeff(coeff) {}
 
-Float KernelSigmoid::operator()(const FloatArray& x1,
-                                const FloatArray& x2) const {
+FloatArray KernelSigmoid::operator()(const FloatArray& x1,
+                                     const FloatArray& x2) const {
   auto s = xt::linalg::dot(x1, xt::transpose(x2));
-  return xt::tanh(this->_alpha * s + this->_bias)(0);
+  return xt::tanh(this->_gamma * s + this->_coeff);
 }
 
 }  // namespace core

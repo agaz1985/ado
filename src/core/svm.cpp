@@ -82,8 +82,7 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
       examine_all = true;
   }
 
-  auto filtered_idxs =
-      xt::flatten_indices(xt::argwhere(xt::not_equal(this->_alphas, 0)));
+  auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
   this->_x_support = xt::view(x, xt::keep(filtered_idxs), xt::all());
   this->_y_support = xt::filter(y_target, xt::not_equal(this->_alphas, 0));
   this->_alphas = xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
@@ -117,9 +116,9 @@ std::int8_t SVM::examine_example(const std::size_t i2, const FloatArray& x,
   const auto alph2 = this->_alphas[i2];
 
   auto e2 = this->_errors[i2];
+
   if ((alph2 < this->_tol) || alph2 > (this->_C - this->_tol)) {
-    auto filtered_idxs =
-        xt::flatten_indices(xt::argwhere(xt::not_equal(this->_alphas, 0)));
+    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
     FloatArray x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
     FloatArray y_filtered = xt::filter(y, xt::not_equal(this->_alphas, 0));
     FloatArray alphas_filtered =
@@ -165,12 +164,12 @@ std::int8_t SVM::examine_example(const std::size_t i2, const FloatArray& x,
 
 Float SVM::eval(const FloatArray& x, const FloatArray& y,
                 const FloatArray& alphas, const FloatArray& xi) const {
-  Float w_x = 0.0;
-  for (std::size_t idx = 0; idx < y.size(); ++idx) {
-    w_x += alphas[idx] * y(idx) *
-           this->kernel_function(xt::view(x, idx, xt::all()), xi);
+  if (y.size() == 0) {
+    return -this->_b;
   }
-  return w_x - this->_b;
+
+  auto w_x = xt::sum(alphas * this->_kernel->operator()(x, xi) * y);
+  return w_x(0) - this->_b;
 }
 
 Float SVM::compute_b(const Float& e1, const Float& e2, const Float& y1,
@@ -202,7 +201,7 @@ Float SVM::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
 }
 
 Float SVM::kernel_function(const FloatArray& x1, const FloatArray& x2) const {
-  return this->_kernel->operator()(x1, x2);
+  return this->_kernel->operator()(x1, x2)(0);
 }
 
 std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
@@ -216,8 +215,7 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
 
   Float e1 = this->_errors[i1];
   if ((alph1 < this->_tol) || (alph1 > (this->_C - this->_tol))) {
-    auto filtered_idxs =
-        xt::flatten_indices(xt::argwhere(xt::not_equal(this->_alphas, 0)));
+    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
     FloatArray x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
     FloatArray y_filtered = xt::filter(y, xt::not_equal(this->_alphas, 0));
     FloatArray alphas_filtered =

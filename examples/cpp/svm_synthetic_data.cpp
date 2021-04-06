@@ -45,6 +45,8 @@ int main(int argc, char* argv[]) {
   const auto seed = 16;
   xt::random::seed(seed);
 
+  // Update changelog.
+
   // Define number of training and testing samples.
   const auto n_train_samples = 100;
   const auto n_test_samples = 30;
