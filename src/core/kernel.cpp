@@ -27,10 +27,8 @@ KernelRBF::KernelRBF(const Float gamma)
 
 FloatArray KernelRBF::operator()(const FloatArray& x1,
                                  const FloatArray& x2) const {
-  FloatArray x2_t = xt::transpose(x2);
-  auto distance = xt::linalg::dot(x1, xt::transpose(x1)) +
-                  xt::linalg::dot(x2, x2_t) - 2 * xt::linalg::dot(x1, x2_t);
-  return xt::exp(-distance / (2 * std::pow(this->_gamma, 2)));
+  auto distance = xt::sum(xt::pow(xt::abs(x1 - x2), 2), -1);
+  return xt::exp(-this->_gamma * distance);
 }
 
 // Sigmoid Kernel.
