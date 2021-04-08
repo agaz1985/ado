@@ -13,8 +13,8 @@ using ado::Float;
 
 struct SVM {
   SVM(const Float C, const Float tol, const std::string &kernel_type,
-      const std::size_t max_steps, const std::size_t seed, const Float sigma,
-      const Float degree, const Float alpha, const Float bias);
+      const std::size_t max_steps, const std::size_t seed, const Float gamma,
+      const Float degree, const Float coeff);
 
   void fit(xt::pyarray<double> &x, xt::pyarray<double> &y);
   xt::pyarray<double> fit_predict(xt::pyarray<double> &x,
