@@ -6,10 +6,10 @@
 namespace ado {
 namespace utils {
 
-using ado::FloatArray;
+using ado::FloatTensor;
 
-FloatArray load_data(const std::string& filepath);
-void save_data(const FloatArray& data, const std::string& filepath);
+FloatTensor load_data(const std::string& filepath);
+void save_data(const FloatTensor& data, const std::string& filepath);
 
 }  // namespace utils
 }  // namespace ado

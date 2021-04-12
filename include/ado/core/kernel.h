@@ -13,8 +13,8 @@ class Kernel {
   virtual ~Kernel() = default;
 
   Kernel(const KernelType type) : _type(type){};
-  virtual FloatArray operator()(const FloatArray& x1,
-                                const FloatArray& x2) const = 0;
+  virtual FloatTensor operator()(const FloatTensor& x1,
+                                const FloatTensor& x2) const = 0;
   inline KernelType type() const { return this->_type; }
 
  private:
@@ -25,8 +25,8 @@ class KernelPolynomial : public Kernel {
  public:
   explicit KernelPolynomial(const Float degree, const Float gamma,
                             const Float coeff);
-  virtual FloatArray operator()(const FloatArray& x1,
-                                const FloatArray& x2) const override;
+  virtual FloatTensor operator()(const FloatTensor& x1,
+                                const FloatTensor& x2) const override;
 
  private:
   Float _degree = 1.0;
@@ -37,8 +37,8 @@ class KernelPolynomial : public Kernel {
 class KernelRBF : public Kernel {
  public:
   explicit KernelRBF(const Float gamma);
-  virtual FloatArray operator()(const FloatArray& x1,
-                                const FloatArray& x2) const override;
+  virtual FloatTensor operator()(const FloatTensor& x1,
+                                const FloatTensor& x2) const override;
 
  private:
   Float _gamma = 1.0;
@@ -47,8 +47,8 @@ class KernelRBF : public Kernel {
 class KernelSigmoid : public Kernel {
  public:
   explicit KernelSigmoid(const Float gamma, const Float coeff);
-  virtual FloatArray operator()(const FloatArray& x1,
-                                const FloatArray& x2) const override;
+  virtual FloatTensor operator()(const FloatTensor& x1,
+                                const FloatTensor& x2) const override;
 
  private:
   Float _gamma = 1.0;

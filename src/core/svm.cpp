@@ -29,15 +29,14 @@ using ado::utils::LogLevel;
 
 SVM::SVM(const Float C, const Float tol, std::unique_ptr<Kernel> kernel,
          const std::size_t max_steps, const std::size_t seed)
-    : _C(C),
-      _tol(tol),
-      _kernel(std::move(kernel)),
-      _max_steps(max_steps),
-      _seed(seed) {
+    : C_(C),
+      tol_(tol),
+      kernel_(std::move(kernel)),
+      max_steps_(max_steps) {
   xt::random::seed(seed);
 }
 
-void SVM::fit(const FloatArray& x, const FloatArray& y) {
+void SVM::fit(const FloatTensor& x, const FloatTensor& y) {
   // Check target vector shape.
   auto y_target = y;
   if (y_target.shape().size() == 2) {
@@ -45,15 +44,15 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
   }
 
   const std::size_t n_samples = x.shape(0);
-  this->_alphas = xt::zeros<Float>({n_samples});
-  this->_errors = xt::zeros<Float>({n_samples});
+  this->alphas_ = xt::zeros<Float>({n_samples});
+  this->errors_ = xt::zeros<Float>({n_samples});
 
   std::size_t num_changed = 0;
   bool examine_all = true;
-  std::size_t remaining_steps = this->_max_steps;
+  std::size_t remaining_steps = this->max_steps_;
 
   logger << LogLevel::Info << "Fitting " << n_samples
-         << " samples for a maximum of " << this->_max_steps << " steps.";
+         << " samples for a maximum of " << this->max_steps_ << " steps.";
 
   while ((num_changed > 0 || examine_all) && (remaining_steps > 0)) {
     --remaining_steps;
@@ -66,8 +65,8 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
         num_changed += this->examine_example(idx, x, y_target);
       }
     } else {
-      const auto condition = ((this->_alphas < this->_tol) ||
-                              (this->_alphas > (this->_C - this->_tol)));
+      const auto condition = ((this->alphas_ < this->tol_) ||
+                              (this->alphas_ > (this->C_ - this->tol_)));
       const SizeArray filtered_indexes =
           xt::flatten_indices(xt::where(condition));
 
@@ -82,61 +81,61 @@ void SVM::fit(const FloatArray& x, const FloatArray& y) {
       examine_all = true;
   }
 
-  auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
-  this->_x_support = xt::view(x, xt::keep(filtered_idxs), xt::all());
-  this->_y_support = xt::filter(y_target, xt::not_equal(this->_alphas, 0));
-  this->_alphas = xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
+  auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->alphas_));
+  this->x_support_ = xt::view(x, xt::keep(filtered_idxs), xt::all());
+  this->y_support_ = xt::filter(y_target, xt::not_equal(this->alphas_, 0));
+  this->alphas_ = xt::filter(this->alphas_, xt::not_equal(this->alphas_, 0));
 }
 
-FloatArray SVM::fit_predict(const FloatArray& x, const FloatArray& y) {
+FloatTensor SVM::fit_predict(const FloatTensor& x, const FloatTensor& y) {
   this->fit(x, y);
   return this->predict(x);
 }
 
-FloatArray SVM::predict(const FloatArray& x) {
+FloatTensor SVM::predict(const FloatTensor& x) {
   auto y_hat = this->decision_function(x);
   filtration(y_hat, y_hat < 0) = -1;
   filtration(y_hat, y_hat > 0) = 1;
   return y_hat;
 }
 
-FloatArray SVM::decision_function(const FloatArray& x) {
-  FloatArray predictions = xt::zeros<Float>({x.shape(0)});
+FloatTensor SVM::decision_function(const FloatTensor& x) {
+  FloatTensor predictions = xt::zeros<Float>({x.shape(0)});
 
   for (std::size_t idx = 0; idx < x.shape(0); ++idx) {
-    predictions[idx] = this->eval(this->_x_support, this->_y_support,
-                                  this->_alphas, xt::view(x, idx, xt::all()));
+    predictions[idx] = this->eval(this->x_support_, this->y_support_,
+                                  this->alphas_, xt::view(x, idx, xt::all()));
   }
   return predictions;
 }
 
-std::int8_t SVM::examine_example(const std::size_t i2, const FloatArray& x,
-                                 const FloatArray& y) {
+std::int8_t SVM::examine_example(const std::size_t i2, const FloatTensor& x,
+                                 const FloatTensor& y) {
   const auto y2 = y(i2);
-  const auto alph2 = this->_alphas[i2];
+  const auto alph2 = this->alphas_[i2];
 
-  auto e2 = this->_errors[i2];
+  auto e2 = this->errors_[i2];
 
-  if ((alph2 < this->_tol) || alph2 > (this->_C - this->_tol)) {
-    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
-    FloatArray x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
-    FloatArray y_filtered = xt::filter(y, xt::not_equal(this->_alphas, 0));
-    FloatArray alphas_filtered =
-        xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
+  if ((alph2 < this->tol_) || alph2 > (this->C_ - this->tol_)) {
+    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->alphas_));
+    FloatTensor x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
+    FloatTensor y_filtered = xt::filter(y, xt::not_equal(this->alphas_, 0));
+    FloatTensor alphas_filtered =
+        xt::filter(this->alphas_, xt::not_equal(this->alphas_, 0));
     e2 = this->eval(x_filtered, y_filtered, alphas_filtered,
                     xt::view(x, i2, xt::all())) -
          y2;
   }
 
   auto r2 = e2 * y2;
-  if ((r2 < -this->_tol && alph2 < this->_C) ||
-      (r2 > this->_tol && alph2 > 0)) {
-    const auto condition = ((this->_alphas < this->_tol) ||
-                            (this->_alphas > (this->_C - this->_tol)));
+  if ((r2 < -this->tol_ && alph2 < this->C_) ||
+      (r2 > this->tol_ && alph2 > 0)) {
+    const auto condition = ((this->alphas_ < this->tol_) ||
+                            (this->alphas_ > (this->C_ - this->tol_)));
     SizeArray filtered_indexes = xt::flatten_indices(xt::where(condition));
 
     if (filtered_indexes.size() > 0) {
-      const auto i1 = xt::argmax(this->_errors);
+      const auto i1 = xt::argmax(this->errors_);
       if (this->take_step(i1(0), i2, x, y, y2, alph2, e2)) {
         return 1;
       }
@@ -162,14 +161,14 @@ std::int8_t SVM::examine_example(const std::size_t i2, const FloatArray& x,
   return 0;
 }
 
-Float SVM::eval(const FloatArray& x, const FloatArray& y,
-                const FloatArray& alphas, const FloatArray& xi) const {
+Float SVM::eval(const FloatTensor& x, const FloatTensor& y,
+                const FloatTensor& alphas, const FloatTensor& xi) const {
   if (y.size() == 0) {
-    return -this->_b;
+    return -this->b_;
   }
 
-  auto w_x = xt::sum(alphas * this->_kernel->operator()(x, xi) * y);
-  return w_x(0) - this->_b;
+  auto w_x = xt::sum(alphas * this->kernel_->operator()(x, xi) * y);
+  return w_x(0) - this->b_;
 }
 
 Float SVM::compute_b(const Float& e1, const Float& e2, const Float& y1,
@@ -177,13 +176,13 @@ Float SVM::compute_b(const Float& e1, const Float& e2, const Float& y1,
                      const Float& a2, const Float& alph2, const Float& k11,
                      const Float& k12, const Float& k22) const {
   const auto b1 =
-      e1 + y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12 + this->_b;
+      e1 + y1 * (a1 - alph1) * k11 + y2 * (a2 - alph2) * k12 + this->b_;
   const auto b2 =
-      e2 + y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22 + this->_b;
+      e2 + y1 * (a1 - alph1) * k12 + y2 * (a2 - alph2) * k22 + this->b_;
 
-  if ((a1 > 0) && (a1 < this->_C))
+  if ((a1 > 0) && (a1 < this->C_))
     return b1;
-  else if ((a2 > 0) && (a2 < this->_C))
+  else if ((a2 > 0) && (a2 < this->C_))
     return b2;
   else
     return (b1 + b2) / 2.0;
@@ -193,33 +192,33 @@ Float SVM::compute_gamma(const Float& alph1, const Float& alph2, const Float& V,
                          const Float& k11, const Float& k12, const Float& k22,
                          const Float& s, const Float& y1, const Float& y2,
                          const Float& e1, const Float& e2) const {
-  const auto f1 = y1 * (e1 + this->_b) - alph1 * k11 - s * alph2 * k12;
-  const auto f2 = y2 * (e2 + this->_b) - s * alph1 * k12 - alph2 * k22;
+  const auto f1 = y1 * (e1 + this->b_) - alph1 * k11 - s * alph2 * k12;
+  const auto f2 = y2 * (e2 + this->b_) - s * alph1 * k12 - alph2 * k22;
   const auto V1 = alph1 + s * (alph2 - V);
   return V1 * f1 + V * f2 + 0.5 * (V1 * V1) * k11 + 0.5 * (V * V) * k22 +
          s * V * V1 * k12;
 }
 
-Float SVM::kernel_function(const FloatArray& x1, const FloatArray& x2) const {
-  return this->_kernel->operator()(x1, x2)(0);
+Float SVM::kernel_function(const FloatTensor& x1, const FloatTensor& x2) const {
+  return this->kernel_->operator()(x1, x2)(0);
 }
 
 std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
-                           const FloatArray& x, const FloatArray& y,
+                           const FloatTensor& x, const FloatTensor& y,
                            const Float& y2, const Float& alph2,
                            const Float& e2) {
   if (i1 == i2) return 0;
 
-  Float alph1 = this->_alphas[i1];
+  Float alph1 = this->alphas_[i1];
   Float y1 = y(i1);
 
-  Float e1 = this->_errors[i1];
-  if ((alph1 < this->_tol) || (alph1 > (this->_C - this->_tol))) {
-    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->_alphas));
-    FloatArray x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
-    FloatArray y_filtered = xt::filter(y, xt::not_equal(this->_alphas, 0));
-    FloatArray alphas_filtered =
-        xt::filter(this->_alphas, xt::not_equal(this->_alphas, 0));
+  Float e1 = this->errors_[i1];
+  if ((alph1 < this->tol_) || (alph1 > (this->C_ - this->tol_))) {
+    auto filtered_idxs = xt::flatten_indices(xt::nonzero(this->alphas_));
+    FloatTensor x_filtered = xt::view(x, xt::keep(filtered_idxs), xt::all());
+    FloatTensor y_filtered = xt::filter(y, xt::not_equal(this->alphas_, 0));
+    FloatTensor alphas_filtered =
+        xt::filter(this->alphas_, xt::not_equal(this->alphas_, 0));
     e1 = this->eval(x_filtered, y_filtered, alphas_filtered,
                     xt::view(x, i1, xt::all())) -
          y1;
@@ -231,11 +230,11 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
   Float H = 0;
 
   if (y1 != y2) {
-    L = std::max(0.0, alph2 - alph1);
-    H = std::min(this->_C, this->_C + alph2 - alph1);
+    L = std::max(Float(0.0), alph2 - alph1);
+    H = std::min(this->C_, this->C_ + alph2 - alph1);
   } else {
-    L = std::max(0.0, alph2 + alph1 - this->_C);
-    H = std::min(this->_C, alph2 + alph1);
+    L = std::max(Float(0.0), alph2 + alph1 - this->C_);
+    H = std::min(this->C_, alph2 + alph1);
   }
 
   if (L == H) return 0;
@@ -256,31 +255,31 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
         this->compute_gamma(alph1, alph2, L, k11, k12, k22, s, y1, y2, e1, e2);
     const auto Hobj =
         this->compute_gamma(alph1, alph2, H, k11, k12, k22, s, y1, y2, e1, e2);
-    if (Lobj < (Hobj - this->_tol))
+    if (Lobj < (Hobj - this->tol_))
       a2 = L;
-    else if (Lobj > (Hobj + this->_tol))
+    else if (Lobj > (Hobj + this->tol_))
       a2 = H;
     else
       a2 = alph2;
   }
 
-  if (std::abs(a2 - alph2) < this->_tol * (a2 + alph2 + this->_tol)) {
+  if (std::abs(a2 - alph2) < this->tol_ * (a2 + alph2 + this->tol_)) {
     return 0;
   }
 
   const auto a1 = alph1 + s * (alph2 - a2);
   auto new_b =
       this->compute_b(e1, e2, y1, a1, alph1, y2, a2, alph2, k11, k12, k22);
-  auto delta_b = new_b - this->_b;
-  this->_b = new_b;
+  auto delta_b = new_b - this->b_;
+  this->b_ = new_b;
 
   // Error cache.
   auto t1 = y1 * (a1 - alph1);
   auto t2 = y2 * (a2 - alph2);
 
-  for (std::size_t idx = 0; idx < this->_alphas.size(); ++idx) {
-    if ((this->_alphas[idx] > 0) && (this->_alphas[idx] < this->_C)) {
-      this->_errors[idx] +=
+  for (std::size_t idx = 0; idx < this->alphas_.size(); ++idx) {
+    if ((this->alphas_[idx] > 0) && (this->alphas_[idx] < this->C_)) {
+      this->errors_[idx] +=
           t1 * this->kernel_function(xt::view(x, i1, xt::all()),
                                      xt::view(x, idx, xt::all())) +
           t2 * this->kernel_function(xt::view(x, i2, xt::all()),
@@ -289,11 +288,11 @@ std::int8_t SVM::take_step(const std::size_t i1, const std::size_t i2,
     }
   }
 
-  this->_errors(i1) = 0.0;
-  this->_errors(i2) = 0.0;
+  this->errors_(i1) = 0.0;
+  this->errors_(i2) = 0.0;
 
-  this->_alphas(i1) = a1;
-  this->_alphas(i2) = a2;
+  this->alphas_(i1) = a1;
+  this->alphas_(i2) = a2;
 
   return 1;
 }

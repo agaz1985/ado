@@ -4,17 +4,14 @@
 #include <xtensor/xrandom.hpp>
 #include <xtensor/xview.hpp>
 
-#include "ado/core/kernel.h"
-#include "ado/core/svm.h"
+#include "ado/core/linear_svm.h"
 #include "ado/random/seed.h"
 #include "ado/types.h"
 #include "ado/utils/io.h"
 #include "ado/utils/logger.h"
 
 using ado::FloatTensor;
-using ado::core::Kernel;
-using ado::core::KernelPolynomial;
-using ado::core::SVM;
+using ado::core::LinearSVM;
 using ado::utils::load_data;
 using ado::utils::LogFileHandler;
 using ado::utils::Logger;
@@ -46,21 +43,15 @@ int main(int argc, char* argv[]) {
 
   // Define the random seed.
   const auto seed = 16;
-  ado::random::seed(seed);
-
-  // Define number of training and testing samples.
-  const auto n_train_samples = 100;
-  const auto n_test_samples = 30;
+  ado::random::seed(16);
 
   // Load and shuffle the training data.
   logger << LogLevel::Info << "Loading training data...";
 
   FloatTensor training_data = load_data("../data/occupancy/datatraining.csv");
   xt::random::shuffle(training_data);
-  FloatTensor x_train =
-      xt::view(training_data, xt::range(0, n_train_samples), xt::range(0, 5));
-  FloatTensor y_train =
-      xt::view(training_data, xt::range(0, n_train_samples), 5);
+  FloatTensor x_train = xt::view(training_data, xt::all(), xt::range(0, 5));
+  FloatTensor y_train = xt::view(training_data, xt::all(), 5);
 
   x_train = column_wise_normalization(x_train);
   target_preprocessing(y_train);
@@ -70,27 +61,27 @@ int main(int argc, char* argv[]) {
 
   FloatTensor test_data = load_data("../data/occupancy/datatest2.csv");
   xt::random::shuffle(test_data);
-  FloatTensor x_test =
-      xt::view(test_data, xt::range(0, n_test_samples), xt::range(0, 5));
-  FloatTensor y_test = xt::view(test_data, xt::range(0, n_test_samples), 5);
+  FloatTensor x_test = xt::view(test_data, xt::all(), xt::range(0, 5));
+  FloatTensor y_test = xt::view(test_data, xt::all(), 5);
 
   x_test = column_wise_normalization(x_test);
   target_preprocessing(y_test);
 
-  // Define a linear kernel.
-  auto kernel = std::make_unique<KernelPolynomial>(1.0, 1.0, 0.0);
+  logger << LogLevel::Info << "Fitting the linear SVM model on "
+         << y_train.size() << " training samples...";
 
-  logger << LogLevel::Info << "Fitting the SVM model...";
-  auto svm = SVM(1.0, 1e-4, std::move(kernel), 100, seed);
-  svm.fit(x_train, y_train);
+  auto linear_svm = LinearSVM(20.0, 5e-2, 0.0, 0.0, 1e3, true, seed);
+  linear_svm.fit(x_train, y_train);
 
-  logger << LogLevel::Info << "Running inference on test data...";
-  auto y_hat = svm.predict(x_test);
+  logger << LogLevel::Info << "Running inference on " << y_test.size()
+         << " test samples...";
+
+  auto y_hat = linear_svm.predict(x_test);
 
   // Computing the accuracy on the test set.
   const auto accuracy =
       xt::count_nonzero(xt::cast<uint8_t>(xt::equal(y_hat, y_test))) /
-      (1.f * n_test_samples);
+      (1.f * y_test.size());
 
   logger << LogLevel::Info << std::setprecision(2)
          << "Accuracy: " << accuracy * 100 << " %";

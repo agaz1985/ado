@@ -46,7 +46,7 @@ class SVM : public Model {
    * @param y array containing the target labels. The array must have shape
    * (N,1) or (N) and binary values [-1, 1]. With N number of samples.
    */
-  void fit(const FloatArray& x, const FloatArray& y) override;
+  void fit(const FloatTensor& x, const FloatTensor& y) override;
 
   /**
    * @brief Fit the model and run inference.
@@ -58,7 +58,7 @@ class SVM : public Model {
    * @return FloatArray array containing the predicted labels. The array has
    * shape (N) and binary values [-1, 1]. With N number of samples.
    */
-  FloatArray fit_predict(const FloatArray& x, const FloatArray& y) override;
+  FloatTensor fit_predict(const FloatTensor& x, const FloatTensor& y) override;
 
   /**
    * @brief Run inference and return the predicted labels.
@@ -68,7 +68,7 @@ class SVM : public Model {
    * @return FloatArray array containing the predicted labels. The array has
    * shape (N) and binary values [-1, 1]. With N number of samples.
    */
-  FloatArray predict(const FloatArray& x) override;
+  FloatTensor predict(const FloatTensor& x) override;
 
   /**
    * @brief Run inference and return the un-thresholded predicted values.
@@ -79,14 +79,14 @@ class SVM : public Model {
    * The array has shape (N) and real values. With N number of
    * samples.
    */
-  FloatArray decision_function(const FloatArray& x) override;
+  FloatTensor decision_function(const FloatTensor& x) override;
 
  private:
   /**
    * @brief Evaluate the model.
    */
-  Float eval(const FloatArray& x, const FloatArray& y, const FloatArray& alphas,
-             const FloatArray& xi) const;
+  Float eval(const FloatTensor& x, const FloatTensor& y,
+             const FloatTensor& alphas, const FloatTensor& xi) const;
 
   /**
    * @brief Compute the bias term.
@@ -105,32 +105,31 @@ class SVM : public Model {
   /**
    * @brief Evaluate the kernel function.
    */
-  Float kernel_function(const FloatArray& x1, const FloatArray& x2) const;
+  Float kernel_function(const FloatTensor& x1, const FloatTensor& x2) const;
 
   /**
    * @brief Examine example step of the SMO algorithm.
    */
-  std::int8_t examine_example(const std::size_t i2, const FloatArray& x,
-                              const FloatArray& y);
+  std::int8_t examine_example(const std::size_t i2, const FloatTensor& x,
+                              const FloatTensor& y);
 
   /**
    * @brief Take step of the SMO algorithm.
    */
   std::int8_t take_step(const std::size_t i1, const std::size_t i2,
-                        const FloatArray& x, const FloatArray& y,
+                        const FloatTensor& x, const FloatTensor& y,
                         const Float& y2, const Float& alph2, const Float& e2);
 
-  Float _C = 1.0;
-  Float _tol = 1e-3;
-  std::unique_ptr<Kernel> _kernel =
+  Float C_ = 1.0;
+  Float tol_ = 1e-3;
+  std::unique_ptr<Kernel> kernel_ =
       std::make_unique<KernelPolynomial>(1.0, 1.0, 0.0);
-  FloatArray _alphas = FloatArray();
-  Float _b = 0.0;
-  FloatArray _errors = FloatArray();
-  FloatArray _x_support = FloatArray();
-  FloatArray _y_support = FloatArray();
-  std::size_t _max_steps = 1e3;
-  std::size_t _seed = 16;
+  FloatTensor alphas_ = FloatTensor();
+  Float b_ = 0.0;
+  FloatTensor errors_ = FloatTensor();
+  FloatTensor x_support_ = FloatTensor();
+  FloatTensor y_support_ = FloatTensor();
+  std::size_t max_steps_ = 1e3;
 };
 
 }  // namespace core
