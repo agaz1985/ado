@@ -22,7 +22,7 @@ class Graph {
         params_list.push_back(layer.second->parameters());
       }
     }
-    return params_list;
+    return params_list; //TODO: add a way to save model.
   }
 
   void register_layer(typename Layer<T>::LayerPtr layer,

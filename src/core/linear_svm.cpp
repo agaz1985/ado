@@ -6,12 +6,12 @@
 #include <xtensor/xsort.hpp>
 #include <xtensor/xtensor.hpp>
 
-#include "ado/core/linear_svm_model.h"
 #include "ado/graph/variable.h"
 #include "ado/layers/essentials.h"
 #include "ado/losses/loss.h"
 #include "ado/optimizers/optimizer.h"
 #include "ado/utils/logger.h"
+#include "ado/zoo/linear_svm_model.h"
 
 namespace {
 auto& logger = ado::utils::Logger::get();
@@ -20,11 +20,11 @@ auto& logger = ado::utils::Logger::get();
 namespace ado {
 namespace core {
 
-using ado::core::LinearSVMModel;
 using ado::graph::FloatVariable;
 using ado::losses::HingeLoss;
 using ado::optimizers::SGD;
 using ado::utils::LogLevel;
+using ado::zoo::LinearSVMModel;
 
 LinearSVM::LinearSVM(const Float C, const Float lr, const Float momentum,
                      const Float decay, const Int epochs, const bool intercept,

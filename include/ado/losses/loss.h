@@ -1,6 +1,9 @@
 #ifndef ADO_LOSSES_LOSS_H
 #define ADO_LOSSES_LOSS_H
 
+#include <limits.h>
+
+#include "ado/constants.h"
 #include "ado/graph/operator.h"
 #include "ado/layers/essentials.h"
 #include "ado/math/functions.h"
@@ -16,10 +19,12 @@ using ado::math::log;
 using ado::math::mean;
 using ado::math::pow;
 using ado::math::sum;
+using ado::math::operator+;
 using ado::math::operator-;
 using ado::math::operator*;
 using ado::math::maximum;
 
+using ado::EPS_FLOAT_VALUE;
 using ado::layers::essentials::Linear;
 
 template <typename T>
@@ -57,7 +62,8 @@ class BCELoss : public Loss<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input, Operand<T> target) override {
-    return -1 * (target * log(input) + (1 - target) * log(1 - input));
+    return -1 * (target * log(input + EPS_FLOAT_VALUE) +
+                 (1 - target) * log(1 - input + EPS_FLOAT_VALUE));
   }
 };
 

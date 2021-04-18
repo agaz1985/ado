@@ -142,6 +142,27 @@ void MaximumOperator<T>::backward_pass(const Tensor<T>& grad) {
                 grad, zeros));
 }
 
+// Where operator.
+
+template <typename T>
+WhereOperator<T>::WhereOperator(const Operand<T> op1, const Operand<T> op2,
+                                const Tensor<bool> condition)
+    : BinaryOperator<T>({op1, op2}), condition_(condition) {}
+
+template <typename T>
+Tensor<T> WhereOperator<T>::forward() {
+  return xt::where(this->condition_, this->operands_[0]->forward(),
+                   this->operands_[1]->forward());
+}
+
+template <typename T>
+void WhereOperator<T>::backward_pass(const Tensor<T>& grad) {
+  this->operands_[0]->backward(
+      xt::where(this->condition_, grad, xt::zeros_like(grad)));
+  this->operands_[1]->backward(
+      xt::where(this->condition_, xt::zeros_like(grad), grad));
+}
+
 }  // namespace math
 }  // namespace ado
 

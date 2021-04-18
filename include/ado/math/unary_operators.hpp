@@ -33,7 +33,7 @@ Tensor<T> LogOperator<T>::forward() {
 
 template <typename T>
 void LogOperator<T>::backward_pass(const Tensor<T>& grad) {
-  this->operands_[0]->backward((1 / this->operands_[0]->forward()) * grad);
+  this->operands_[0]->backward(1.0 / this->operands_[0]->forward() * grad);
 }
 
 // Transpose operator.
@@ -48,8 +48,7 @@ Tensor<T> TrOperator<T>::forward() {
 
 template <typename T>
 void TrOperator<T>::backward_pass(const Tensor<T>& grad) {
-  this->operands_[0]->backward(
-      xt::ones<T>(xt::transpose(this->operands_[0]->forward()).shape()) * grad);
+  this->operands_[0]->backward(xt::transpose(grad));
 }
 
 // Sum operator.
@@ -81,7 +80,8 @@ Tensor<T> MeanOperator<T>::forward() {
 template <typename T>
 void MeanOperator<T>::backward_pass(const Tensor<T>& grad) {
   auto input_shape = this->operands_[0]->forward().shape();
-  auto inv_n_elements = 1.0 / std::accumulate(input_shape.begin(), input_shape.end(), 0);
+  auto inv_n_elements =
+      1.0 / std::accumulate(input_shape.begin(), input_shape.end(), 0);
   this->operands_[0]->backward(xt::ones<T>(input_shape) * inv_n_elements *
                                grad);
 }
@@ -101,16 +101,12 @@ Tensor<T> ClampOperator<T>::forward() {
 
 template <typename T>
 void ClampOperator<T>::backward_pass(const Tensor<T>& grad) {
-  auto higher_indexes =
-      xt::argwhere(this->operands_[0]->forward() >= this->max_value_);
-  auto lower_indexes =
-      xt::argwhere(this->operands_[0]->forward() <= this->min_value_);
+  auto backward =
+      xt::where((this->operands_[0]->forward() >= this->min_value_) &&
+                    (this->operands_[0]->forward() <= this->max_value_),
+                grad, xt::zeros_like(grad));
 
-  auto idx = xt::from_indices(higher_indexes);
-  auto tmp = xt::ones<T>(this->operands_[0]->forward().shape());
-
-  // TODO: set high and low tmp elements to 0.
-  this->operands_[0]->backward(tmp * grad);
+  this->operands_[0]->backward(backward);
 }
 
 // Power operator.

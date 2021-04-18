@@ -9,7 +9,8 @@ namespace ado {
 namespace graph {
 
 template <typename T>
-Node<T>::Node(const bool requires_grad) : requires_grad_(requires_grad) {}
+Node<T>::Node(const bool requires_grad, const T grad)
+    : requires_grad_(requires_grad), grad_(grad), empty_grad_(true) {}
 
 template <typename T>
 void Node<T>::backward() {
@@ -35,12 +36,17 @@ void Node<T>::update_grad(const T& grad) {
         "Backward pass not allowed on tensor that does not require gradient "
         "computation.");
   }
-  this->grad_ += grad;
+  if (this->empty_grad_ == true) {
+    this->grad_ = grad;
+    this->empty_grad_ = false;
+  } else {
+    this->grad_ += grad;
+  }
 }
 
 template <typename T>
 void Node<T>::zero_grad() {
-  this->update_grad(T());
+  this->empty_grad_ = true;
 }
 
 template <typename T>

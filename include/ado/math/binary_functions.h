@@ -115,6 +115,14 @@ Operand<T> maximum(const Operand<T> op1, const T op2) {
   return std::make_shared<MaximumOperator<T>>(op1, tmp);
 }
 
+// Where functions.
+
+template <typename T>
+Operand<T> cond(const Operand<T> op1, const Operand<T> op2,
+                const Tensor<bool> condition) {
+  return std::make_shared<WhereOperator<T>>(op1, op2, condition);
+}
+
 // Float function operators.
 
 // Add float functions.
@@ -191,6 +199,13 @@ Operand<Float> maximum(const Float op1, const Operand<Float> op2) {
 
 Operand<Float> maximum(const Operand<Float> op1, const Float op2) {
   return maximum<Float>(op1, op2);
+}
+
+// Where float functions.
+
+Operand<Float> cond(const Operand<Float> op1, const Operand<Float> op2,
+                    const Tensor<bool> condition) {
+  return cond<Float>(op1, op2, condition);
 }
 
 }  // namespace math

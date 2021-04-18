@@ -1,7 +1,5 @@
-#ifndef ADO_CORE_LINEAR_SVM_MODEL_H
-#define ADO_CORE_LINEAR_SVM_MODEL_H
-
-#include <memory>
+#ifndef ADO_ZOO_LINEAR_SVM_MODEL_H
+#define ADO_ZOO_LINEAR_SVM_MODEL_H
 
 #include "ado/graph/variable.h"
 #include "ado/layers/activations.h"
@@ -15,7 +13,7 @@ using ado::graph::Operand;
 using ado::layers::essentials::Linear;
 
 namespace ado {
-namespace core {
+namespace zoo {
 
 template <typename T>
 class LinearSVMModel : public Graph<T> {
@@ -31,7 +29,7 @@ class LinearSVMModel : public Graph<T> {
   }
 };
 
-}  // namespace core
+}  // namespace zoo
 }  // namespace ado
 
-#endif  // ADO_CORE_LINEAR_SVM_MODEL_H
+#endif  // ADO_ZOO_LINEAR_SVM_MODEL_H

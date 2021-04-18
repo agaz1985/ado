@@ -75,6 +75,21 @@ class MaximumOperator : public BinaryOperator<T> {
   virtual void backward_pass(const Tensor<T>& grad) override;
 };
 
+template <typename T>
+class WhereOperator : public BinaryOperator<T> {
+ public:
+  WhereOperator(const Operand<T> op1, const Operand<T> op2,
+                const Tensor<bool> condition);
+
+  virtual Tensor<T> forward() override;
+
+ protected:
+  virtual void backward_pass(const Tensor<T>& grad) override;
+
+ private:
+  Tensor<bool> condition_ = T();
+};
+
 }  // namespace math
 }  // namespace ado
 

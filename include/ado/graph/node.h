@@ -9,7 +9,7 @@ namespace graph {
 template <typename T>
 class Node {
  public:
-  explicit Node(const bool requires_grad = false);
+  explicit Node(const bool requires_grad = false, const T grad = T());
   virtual ~Node() = default;
 
   virtual T forward() = 0;
@@ -28,6 +28,7 @@ class Node {
 
   T grad_;
   bool requires_grad_ = false;
+  bool empty_grad_ = true;
 };
 
 template <typename T>

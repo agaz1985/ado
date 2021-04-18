@@ -16,6 +16,7 @@ using ado::math::operator+;
 using ado::math::operator*;
 using ado::math::operator/;
 using ado::math::clamp;
+using ado::math::cond;
 using ado::math::exp;
 using ado::math::sum;
 
@@ -28,7 +29,10 @@ class Sigmoid : public Layer<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input) override {
-    return 1 / (1 + exp(-1 * input));
+    auto max_value = std::numeric_limits<T>::max();
+    auto min_value = std::numeric_limits<T>::min();
+    auto c_input = clamp(input, min_value, max_value - min_value);
+    return 1.0 / (1.0 + exp(-1.0 * c_input));
   }
 };
 
@@ -39,9 +43,8 @@ class Tanh : public Layer<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input) override {
-    auto e_x = exp(input);
-    auto e_n_x = exp(-1 * input);
-    return (e_x - e_n_x) / (e_x + e_n_x);
+    auto denominator = 1.0 + exp(-2.0 * input);
+    return (2.0 / denominator) - 1;
   }
 };
 

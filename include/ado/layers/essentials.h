@@ -48,7 +48,7 @@ class Linear : public Layer<T> {
   void init_params() {  // TODO: move generator type out of variable and make it
                         // as input to this layer.
     this->parameters_["weights"]
-        ->ones();  // TODO: implememnt
+        ->rand();  // TODO: implememnt
                    // setRandom(core::graph::RandomGeneratorType::Normal);
     this->parameters_["bias"]->zeros();
   }
