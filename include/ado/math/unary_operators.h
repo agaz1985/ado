@@ -2,6 +2,7 @@
 #define ADO_MATH_UNARY_OPERATORS_H
 
 #include <limits>
+#include <vector>
 
 #include "ado/graph/operator.h"
 
@@ -47,12 +48,15 @@ class TrOperator : public UnaryOperator<T> {
 template <typename T>
 class SumOperator : public UnaryOperator<T> {
  public:
-  SumOperator(const Operand<T> op);
+  SumOperator(const Operand<T> op, const std::vector<int>& axes = {});
 
   virtual Tensor<T> forward() override;
 
  protected:
   virtual void backward_pass(const Tensor<T>& grad) override;
+
+ private:
+  std::vector<int> axes_;
 };
 
 template <typename T>

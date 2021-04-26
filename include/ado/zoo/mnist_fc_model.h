@@ -10,7 +10,7 @@ using ado::layers::Graph;
 
 using ado::graph::Operand;
 using ado::layers::activations::ReLU;
-using ado::layers::activations::Sigmoid;
+using ado::layers::activations::Softmax;
 using ado::layers::essentials::Linear;
 
 // TODO: move h to hpp implementations.
@@ -27,7 +27,7 @@ class MNISTFCModel : public Graph<T> {
     auto fc_1_ = std::make_shared<Linear<T>>(input_size, hidden_size, true);
     auto relu_ = std::make_shared<ReLU<T>>();
     auto fc_2_ = std::make_shared<Linear<T>>(hidden_size, num_classes, true);
-    auto act_ = std::make_shared<Sigmoid<T>>();
+    auto act_ = std::make_shared<Softmax<T>>();
 
     this->register_layer(fc_1_, "fc_1_");
     this->register_layer(relu_, "relu_");

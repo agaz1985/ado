@@ -23,6 +23,8 @@ using IntTensor = Tensor<Int>;
 template <typename T>
 using TensorShape = typename Tensor<T>::shape_type;
 
+using FloatTensorShape = TensorShape<Float>;
+
 using SizeArray = Tensor<std::size_t>;
 
 }  // namespace ado

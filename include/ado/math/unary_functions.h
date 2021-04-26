@@ -2,6 +2,7 @@
 #define ADO_MATH_UNARY_FUNCTIONS_H
 
 #include <limits>
+#include <vector>
 
 #include "ado/graph/operator.h"
 #include "ado/math/unary_operators.h"
@@ -30,7 +31,17 @@ Operand<T> tr(const Operand<T> op) {
 
 template <typename T>
 Operand<T> sum(const Operand<T> op) {
-  return std::make_shared<SumOperator<T>>(op);
+  return std::make_shared<SumOperator<T>>(op, std::vector<int>());
+}
+
+template <typename T>
+Operand<T> sum(const Operand<T> op, const int axis) {
+  return std::make_shared<SumOperator<T>>(op, std::vector<int>({axis}));
+}
+
+template <typename T>
+Operand<T> sum(const Operand<T> op, const std::vector<int>& axes) {
+  return std::make_shared<SumOperator<T>>(op, axes);
 }
 
 template <typename T>
@@ -59,6 +70,14 @@ Operand<Float> log(const Operand<Float> op) { return log<Float>(op); }
 Operand<Float> tr(const Operand<Float> op) { return tr<Float>(op); }
 
 Operand<Float> sum(const Operand<Float> op) { return sum<Float>(op); }
+
+Operand<Float> sum(const Operand<Float> op, const int axis) {
+  return sum<Float>(op, axis);
+}
+
+Operand<Float> sum(const Operand<Float> op, const std::vector<int>& axes) {
+  return sum<Float>(op, axes);
+}
 
 Operand<Float> clamp(
     const Operand<Float> op,

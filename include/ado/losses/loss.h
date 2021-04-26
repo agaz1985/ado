@@ -62,8 +62,21 @@ class BCELoss : public Loss<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input, Operand<T> target) override {
-    return -1 * (target * log(input + EPS_FLOAT_VALUE) +
-                 (1 - target) * log(1 - input + EPS_FLOAT_VALUE));
+    return -1.0 * (target * log(input + EPS_FLOAT_VALUE) +
+                   (1.0 - target) * log(1.0 - input + EPS_FLOAT_VALUE));
+  }
+};
+
+template <typename T>
+class CrossEntropyLoss : public Loss<T> {
+ public:
+  CrossEntropyLoss(
+      const typename Loss<T>::ReduceType reduce = Loss<T>::ReduceType::Mean)
+      : Loss<T>(reduce) {}
+
+ protected:
+  virtual Operand<T> forward(Operand<T> input, Operand<T> target) override {
+    return -1.0 * target * log(input + EPS_FLOAT_VALUE);
   }
 };
 

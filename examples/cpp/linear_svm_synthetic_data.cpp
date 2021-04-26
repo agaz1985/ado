@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   logger << LogLevel::Info << "Fitting the linear SVM model on "
          << y_train.size() << " training samples...";
 
-  auto linear_svm = LinearSVM(20.0, 5e-2, 0.0, 0.0, 1e3, true, seed);
+  auto linear_svm = LinearSVM(10.0, 1e-3, 0.99, 0.0, 1e3, true, seed);
   linear_svm.fit(x_train, y_train);
 
   logger << LogLevel::Info << "Running inference on " << y_test.size()

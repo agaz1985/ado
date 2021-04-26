@@ -9,6 +9,9 @@ then
     source activate $venv_dir
     echo "Install the required C++ libraries..."
     conda install -y nomkl
-    conda install -y -c conda-forge openblas doxygen xtensor xtensor-blas xtensor-python
+    conda install -y -c conda-forge openblas doxygen xtensor xtensor-blas xtensor-python gtest
+
+else
+    echo "Nothing to do, environment already set up."
 fi
 

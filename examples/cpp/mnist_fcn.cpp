@@ -2,6 +2,7 @@
 #include <xtensor/xindex_view.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xrandom.hpp>
+#include <xtensor/xsort.hpp>
 #include <xtensor/xview.hpp>
 
 #include "ado/losses/loss.h"
@@ -15,7 +16,7 @@
 using ado::Float;
 using ado::FloatTensor;
 using ado::graph::FloatVariable;
-using ado::losses::BCELoss;
+using ado::losses::CrossEntropyLoss;
 using ado::optimizers::SGD;
 using ado::utils::load_data;
 using ado::utils::LogFileHandler;
@@ -29,7 +30,14 @@ FloatTensor normalize_zero_one_range(const FloatTensor& x) {
   return xt::eval(x / 255.f);
 }
 
-void binarize_target(FloatTensor& y) { filtration(y, xt::not_equal(y, 0)) = 1; }
+FloatTensor to_one_hot(const FloatTensor& t, const std::size_t n_classes = 10) {
+  FloatTensor one_hot = xt::zeros<Float>({t.shape(0), n_classes});
+  one_hot[t] = 1;
+  return one_hot;
+}
+
+FloatTensor to_categorical(const FloatTensor& t) { return xt::argmax(t, 1); }
+
 }  // namespace
 
 int main(int argv, char* argc[]) {
@@ -53,12 +61,12 @@ int main(int argv, char* argc[]) {
   FloatTensor training_data = load_data("../data/mnist/mnist_train.csv");
   xt::random::shuffle(training_data);
   FloatTensor x_train =
-      xt::view(training_data, xt::range(0, 1000), xt::range(1, 785));
-  FloatTensor y_train = xt::view(training_data, xt::range(0, 1000), 0);
+      xt::view(training_data, xt::range(0, 100), xt::range(1, 785));
+  FloatTensor y_train = xt::view(training_data, xt::range(0, 100), 0); //TODO: fix sum axis backprop and add keep axes option.
 
   // Normalize each image in the training set to 0-1 range.
   x_train = normalize_zero_one_range(x_train);
-  binarize_target(y_train);
+  y_train = to_one_hot(y_train);
 
   // Load and shuffle the testing data.
   logger << LogLevel::Info << "Loading test data...";
@@ -70,15 +78,10 @@ int main(int argv, char* argc[]) {
 
   // Normalize each image in the training set to 0-1 range.
   x_test = normalize_zero_one_range(x_test);
-  binarize_target(y_test);
 
   // TODO: move this.
   if (y_train.shape().size() == 1) {
     y_train.reshape({y_train.shape(0), 1});
-  }
-
-  if (y_test.shape().size() == 1) {
-    y_test.reshape({y_test.shape(0), 1});
   }
 
   // Define the input data.
@@ -86,17 +89,17 @@ int main(int argv, char* argc[]) {
   auto y_train_data = std::make_shared<FloatVariable>(y_train, false);
 
   // Instantiate the MNIST model.
-  auto model = MNISTFCModel<Float>(784, 32, 1);
+  auto model = MNISTFCModel<Float>(784, 32, 10);
 
   // Instantiate the loss function.
-  auto loss = BCELoss<Float>();
+  auto loss = CrossEntropyLoss<Float>();
 
   // Instantiate the optimizer.
-  auto lr = 1e-2;  // learning rate.
+  auto lr = 1e-3;  // learning rate.
   auto optimizer = SGD<Float>(model.parameters(), lr, 0.99, 0.0);
 
   // Training loop.
-  auto epochs = 200;
+  auto epochs = 5;
   for (auto epoch = 0; epoch < epochs; ++epoch) {
     logger << LogLevel::Debug << "Epoch #" << epoch;
 
@@ -121,14 +124,14 @@ int main(int argv, char* argc[]) {
 
   // Define the input data.
   auto x_test_data = std::make_shared<FloatVariable>(x_test, false);
-  auto y_test_data = std::make_shared<FloatVariable>(y_test, false);
 
-  auto y_hat = model(x_test_data);
+  auto y_hat_one_hot = model(x_test_data);
+  auto y_hat = to_categorical(y_hat_one_hot->forward());
 
   // Computing the accuracy on the test set.
-  const auto accuracy = xt::count_nonzero(xt::cast<uint8_t>(xt::equal(
-                            y_hat->forward(), y_test_data->forward()))) /
-                        (1.f * y_test_data->forward().size());
+  const auto accuracy =
+      xt::count_nonzero(xt::cast<uint8_t>(xt::equal(y_hat, y_test))) /
+      (1.f * y_test.size());
 
   logger << LogLevel::Info << std::setprecision(2)
          << "Accuracy: " << accuracy * 100 << " %";

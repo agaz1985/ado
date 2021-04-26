@@ -29,10 +29,22 @@ class Sigmoid : public Layer<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input) override {
-    auto max_value = std::numeric_limits<T>::max();
-    auto min_value = std::numeric_limits<T>::min();
-    auto c_input = clamp(input, min_value, max_value - min_value);
-    return 1.0 / (1.0 + exp(-1.0 * c_input));
+    auto exponential = exp(-1.0 * input);
+    auto c_exponential = clamp(exponential, MIN_FLOAT_VALUE, MAX_FLOAT_VALUE);
+    return 1.0 / (1.0 + c_exponential);
+  }
+};
+
+template <typename T>
+class Softmax : public Layer<T> {
+ public:
+  Softmax() : Layer<T>(LayerType::Softmax) {}
+
+ protected:
+  virtual Operand<T> forward(Operand<T> input) override {
+    auto exponential = exp(input);
+    auto c_exponential = clamp(exponential, MIN_FLOAT_VALUE, MAX_FLOAT_VALUE);
+    return c_exponential / sum(c_exponential, 1);
   }
 };
 
@@ -43,7 +55,9 @@ class Tanh : public Layer<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input) override {
-    auto denominator = 1.0 + exp(-2.0 * input);
+    auto exponential = exp(-2.0 * input);
+    auto c_exponential = clamp(exponential, MIN_FLOAT_VALUE, MAX_FLOAT_VALUE);
+    auto denominator = 1.0 + c_exponential;
     return (2.0 / denominator) - 1;
   }
 };

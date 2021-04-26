@@ -23,7 +23,8 @@ class Optimizer {
       for (auto parameter : layer_params) {
         if (parameter.second->requires_grad()) {
           parameter.second->update(compute_update(
-              parameter.second->last_update(), parameter.second->grad()));
+              parameter.second->forward(), parameter.second->last_update(),
+              parameter.second->grad()));
         }
       }
     }
@@ -40,7 +41,8 @@ class Optimizer {
   }
 
  protected:
-  virtual Tensor<T> compute_update(const Tensor<T>& prev_update,
+  virtual Tensor<T> compute_update(const Tensor<T>& params,
+                                   const Tensor<T>& prev_update,
                                    const Tensor<T>& grad) = 0;
 
  private:
@@ -56,9 +58,11 @@ class SGD : public Optimizer<T> {
       : Optimizer<T>(parameters), lr_(lr), momentum_(momentum) {}
 
  protected:
-  virtual Tensor<T> compute_update(const Tensor<T>& prev_update,
+  virtual Tensor<T> compute_update(const Tensor<T>& params,
+                                   const Tensor<T>& prev_update,
                                    const Tensor<T>& grad) override {
-    return this->momentum_ * prev_update + this->lr_ * grad;
+    return this->momentum_ * prev_update +
+           this->lr_ * (grad + this->decay_ * params);
   }
 
  private:
