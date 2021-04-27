@@ -44,7 +44,7 @@ class Softmax : public Layer<T> {
   virtual Operand<T> forward(Operand<T> input) override {
     auto exponential = exp(input);
     auto c_exponential = clamp(exponential, MIN_FLOAT_VALUE, MAX_FLOAT_VALUE);
-    return c_exponential / sum(c_exponential, 1);
+    return c_exponential / sum(c_exponential, 1, true);
   }
 };
 

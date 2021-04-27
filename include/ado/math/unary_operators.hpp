@@ -54,17 +54,31 @@ void TrOperator<T>::backward_pass(const Tensor<T>& grad) {
 // Sum operator.
 
 template <typename T>
-SumOperator<T>::SumOperator(const Operand<T> op, const std::vector<int>& axes)
-    : UnaryOperator<T>({op}), axes_(axes) {}
+SumOperator<T>::SumOperator(const Operand<T> op)
+    : UnaryOperator<T>({op}), axes_({}), keep_dim_(false) {}
+
+template <typename T>
+SumOperator<T>::SumOperator(const Operand<T> op, const std::vector<int>& axes,
+                            const bool keep_dim)
+    : UnaryOperator<T>({op}), axes_(axes), keep_dim_(keep_dim) {}
 
 template <typename T>
 Tensor<T> SumOperator<T>::forward() {
+  auto value = this->operands_[0]->forward();
+  Tensor<T> result;
+
   if (this->axes_.empty()) {
-    return xt::sum(this->operands_[0]->forward());
+    result = xt::sum(value);
   } else {
-    return xt::expand_dims(xt::sum(this->operands_[0]->forward(), this->axes_),
-                           1);  // TODO: fix this.
+    result = xt::sum(value, this->axes_);
   }
+
+  if (!this->axes_.empty() && this->keep_dim_) {
+    for (auto index : this->axes_) {
+      result = xt::expand_dims(result, index);
+    }
+  }
+  return result;
 }
 
 template <typename T>

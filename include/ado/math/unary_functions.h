@@ -31,17 +31,20 @@ Operand<T> tr(const Operand<T> op) {
 
 template <typename T>
 Operand<T> sum(const Operand<T> op) {
-  return std::make_shared<SumOperator<T>>(op, std::vector<int>());
+  return std::make_shared<SumOperator<T>>(op);
 }
 
 template <typename T>
-Operand<T> sum(const Operand<T> op, const int axis) {
-  return std::make_shared<SumOperator<T>>(op, std::vector<int>({axis}));
+Operand<T> sum(const Operand<T> op, const int axis,
+               const bool keep_dim = false) {
+  return std::make_shared<SumOperator<T>>(op, std::vector<int>({axis}),
+                                          keep_dim);
 }
 
 template <typename T>
-Operand<T> sum(const Operand<T> op, const std::vector<int>& axes) {
-  return std::make_shared<SumOperator<T>>(op, axes);
+Operand<T> sum(const Operand<T> op, const std::vector<int>& axes,
+               const bool keep_dim = false) {
+  return std::make_shared<SumOperator<T>>(op, axes, keep_dim);
 }
 
 template <typename T>
@@ -71,12 +74,14 @@ Operand<Float> tr(const Operand<Float> op) { return tr<Float>(op); }
 
 Operand<Float> sum(const Operand<Float> op) { return sum<Float>(op); }
 
-Operand<Float> sum(const Operand<Float> op, const int axis) {
-  return sum<Float>(op, axis);
+Operand<Float> sum(const Operand<Float> op, const int axis,
+                   const bool keep_dim) {
+  return sum<Float>(op, axis, keep_dim);
 }
 
-Operand<Float> sum(const Operand<Float> op, const std::vector<int>& axes) {
-  return sum<Float>(op, axes);
+Operand<Float> sum(const Operand<Float> op, const std::vector<int>& axes,
+                   const bool keep_dim) {
+  return sum<Float>(op, axes, keep_dim);
 }
 
 Operand<Float> clamp(

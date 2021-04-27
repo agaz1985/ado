@@ -48,7 +48,9 @@ class TrOperator : public UnaryOperator<T> {
 template <typename T>
 class SumOperator : public UnaryOperator<T> {
  public:
-  SumOperator(const Operand<T> op, const std::vector<int>& axes = {});
+  SumOperator(const Operand<T> op);
+  SumOperator(const Operand<T> op, const std::vector<int>& axes,
+              const bool keep_dim = false);
 
   virtual Tensor<T> forward() override;
 
@@ -57,6 +59,7 @@ class SumOperator : public UnaryOperator<T> {
 
  private:
   std::vector<int> axes_;
+  bool keep_dim_ = false;
 };
 
 template <typename T>
