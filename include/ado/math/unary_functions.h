@@ -64,6 +64,17 @@ Operand<T> pow(const Operand<T> op, const T exponent) {
   return std::make_shared<PowOperator<T>>(op, exponent);
 }
 
+template <typename T>
+Operand<T> max(const Operand<T> op) {
+  return std::make_shared<MaxOperator<T>>(op);
+}
+
+template <typename T>
+Operand<T> max(const Operand<T> op, const std::size_t axis,
+               const bool keep_dim = false) {
+  return std::make_shared<MaxOperator<T>>(op, axis, keep_dim);
+}
+
 // Float function operators.
 
 Operand<Float> exp(const Operand<Float> op) { return exp<Float>(op); }
@@ -93,6 +104,13 @@ Operand<Float> clamp(
 
 Operand<Float> pow(const Operand<Float> op, const Float exponent) {
   return pow<Float>(op, exponent);
+}
+
+Operand<Float> max(const Operand<Float> op) { return max<Float>(op); }
+
+Operand<Float> max(const Operand<Float> op, const std::size_t axis,
+                   const bool keep_dim = false) {
+  return max<Float>(op, axis, keep_dim);
 }
 
 }  // namespace math

@@ -17,6 +17,7 @@ using ado::Float;
 using ado::FloatTensor;
 using ado::graph::FloatVariable;
 using ado::losses::CrossEntropyLoss;
+using ado::losses::MSELoss;
 using ado::optimizers::SGD;
 using ado::utils::load_data;
 using ado::utils::LogFileHandler;
@@ -61,8 +62,10 @@ int main(int argv, char* argc[]) {
   FloatTensor training_data = load_data("../data/mnist/mnist_train.csv");
   xt::random::shuffle(training_data);
   FloatTensor x_train =
-      xt::view(training_data, xt::range(0, 100), xt::range(1, 785));
-  FloatTensor y_train = xt::view(training_data, xt::range(0, 100), 0); //TODO: fix sum axis backprop and add keep axes option.
+      xt::view(training_data, xt::range(0, 1000), xt::range(1, 785));
+  FloatTensor y_train =
+      xt::view(training_data, xt::range(0, 1000),
+               0);  // TODO: fix sum axis backprop and add keep axes option.
 
   // Normalize each image in the training set to 0-1 range.
   x_train = normalize_zero_one_range(x_train);
@@ -95,8 +98,8 @@ int main(int argv, char* argc[]) {
   auto loss = CrossEntropyLoss<Float>();
 
   // Instantiate the optimizer.
-  auto lr = 1e-3;  // learning rate.
-  auto optimizer = SGD<Float>(model.parameters(), lr, 0.99, 0.0);
+  auto lr = 3e-4;  // learning rate.
+  auto optimizer = SGD<Float>(model.parameters(), lr, 0.0, 0.0);
 
   // Training loop.
   auto epochs = 5;

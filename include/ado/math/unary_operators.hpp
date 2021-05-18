@@ -1,6 +1,8 @@
 #ifndef ADO_MATH_UNARY_OPERATORS_HPP
 #define ADO_MATH_UNARY_OPERATORS_HPP
 
+#include <xtensor/xsort.hpp>
+
 #include "ado/math/unary_operators.h"
 
 namespace ado {
@@ -33,6 +35,7 @@ Tensor<T> LogOperator<T>::forward() {
 
 template <typename T>
 void LogOperator<T>::backward_pass(const Tensor<T>& grad) {
+  std::cout << grad << std::endl;
   this->operands_[0]->backward(1.0 / this->operands_[0]->forward() * grad);
 }
 
@@ -126,6 +129,8 @@ void ClampOperator<T>::backward_pass(const Tensor<T>& grad) {
                     (this->operands_[0]->forward() <= this->max_value_),
                 grad, xt::zeros_like(grad));
 
+  std::cout << backward << std::endl;
+
   this->operands_[0]->backward(backward);
 }
 
@@ -146,6 +151,52 @@ void PowOperator<T>::backward_pass(const Tensor<T>& grad) {
       this->exponent_ *
       xt::pow(this->operands_[0]->forward(), this->exponent_ - 1) * grad);
 }  // TODO: implement cache for backward propagation.
+
+// Max operator.
+
+template <typename T>
+MaxOperator<T>::MaxOperator(const Operand<T> op) : UnaryOperator<T>({op}) {}
+
+template <typename T>
+MaxOperator<T>::MaxOperator(const Operand<T> op, const std::size_t axis,
+                            const bool keep_dim)
+    : UnaryOperator<T>({op}),
+      axis_(axis),
+      use_axis_(true),
+      keep_dim_(keep_dim) {}
+
+template <typename T>
+Tensor<T> MaxOperator<T>::forward() {
+  if (this->use_axis_) {
+    if (this->keep_dim_) {
+      return xt::expand_dims(xt::amax(this->operands_[0]->forward(),
+                                      static_cast<int>(this->axis_)),
+                             static_cast<int>(this->axis_));
+    } else {
+      return xt::amax(this->operands_[0]->forward(),
+                      static_cast<int>(this->axis_));
+    }
+  } else {
+    return xt::amax(this->operands_[0]->forward());
+  }
+}
+
+template <typename T>
+void MaxOperator<T>::backward_pass(const Tensor<T>& grad) {
+  auto value = this->operands_[0]->forward();
+  auto max_mask = xt::zeros_like(value);
+
+  if (this->use_axis_) {
+    auto max_idx = xt::argmax(value, static_cast<int>(this->axis_));
+    // TODO: make this axis independent.
+    max_mask[xt::all(), max_idx] = 1;
+  } else {
+    auto max_idx = xt::argmax(value);
+    max_mask[max_idx] = 1.0;
+  }
+
+  this->operands_[0]->backward(max_mask * grad);
+}
 
 }  // namespace math
 }  // namespace ado

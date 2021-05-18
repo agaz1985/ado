@@ -104,6 +104,24 @@ class PowOperator : public UnaryOperator<T> {
   T exponent_ = 1.0;
 };
 
+template <typename T>
+class MaxOperator : public UnaryOperator<T> {
+ public:
+  MaxOperator(const Operand<T> op);
+  MaxOperator(const Operand<T> op, const std::size_t axis,
+              const bool keep_dim = false);
+
+  virtual Tensor<T> forward() override;
+
+ protected:
+  virtual void backward_pass(const Tensor<T>& grad) override;
+
+ private:
+  std::size_t axis_ = 0;
+  bool use_axis_ = false;
+  bool keep_dim_ = false;
+};
+
 }  // namespace math
 }  // namespace ado
 

@@ -22,6 +22,7 @@ using ado::math::sum;
 using ado::math::operator+;
 using ado::math::operator-;
 using ado::math::operator*;
+using ado::math::operator/;
 using ado::math::maximum;
 
 using ado::EPS_FLOAT_VALUE;
@@ -39,7 +40,7 @@ class Loss {
 
     switch (this->reduce_) {
       case Loss<T>::ReduceType::Mean:
-        return mean(loss);
+        return sum(loss) / loss->forward().shape(0);
       case Loss<T>::ReduceType::Sum:
         return sum(loss);
       default:

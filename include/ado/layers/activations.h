@@ -3,6 +3,7 @@
 
 #include <limits>
 
+#include "ado/constants.h"
 #include "ado/graph/operator.h"
 #include "ado/layers/layer.h"
 #include "ado/math/functions.h"
@@ -18,7 +19,11 @@ using ado::math::operator/;
 using ado::math::clamp;
 using ado::math::cond;
 using ado::math::exp;
+using ado::math::max;
 using ado::math::sum;
+
+using ado::MAX_FLOAT_VALUE;
+using ado::MIN_FLOAT_VALUE;
 
 using ado::graph::Operand;
 
@@ -42,9 +47,9 @@ class Softmax : public Layer<T> {
 
  protected:
   virtual Operand<T> forward(Operand<T> input) override {
-    auto exponential = exp(input);
-    auto c_exponential = clamp(exponential, MIN_FLOAT_VALUE, MAX_FLOAT_VALUE);
-    return c_exponential / sum(c_exponential, 1, true);
+    auto shifted_input = input - max(input, 1, true);
+    auto exponential = exp(shifted_input);
+    return exponential / sum(exponential, 1, true);
   }
 };
 

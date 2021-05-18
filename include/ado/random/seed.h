@@ -12,9 +12,7 @@ namespace random {
  *
  * @param seed_value random seed init value.
  */
-void seed(const std::size_t seed_value = time(NULL)) {
-  xt::random::seed(seed_value);
-}
+void seed(const std::size_t seed_value = time(NULL));
 
 }  // namespace random
 }  // namespace ado
